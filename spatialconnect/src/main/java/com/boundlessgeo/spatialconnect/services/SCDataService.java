@@ -95,6 +95,14 @@ public class SCDataService extends SCService {
             @Override
             public Boolean call(SCStoreStatusEvent scStoreStatusEvent) {
                 Log.d(LOG_TAG, "This store is now running: " + scStoreStatusEvent.getStoreId());
+                Log.d(LOG_TAG, "Total stores : " + storesCount);
+                int runningStores = 0;
+                for(SCDataStore store: stores.values()) {
+                    if (store.getStatus().equals(SCDataStoreStatus.SC_DATA_STORE_RUNNING)){
+                        runningStores++;
+                    }
+                }
+                Log.d(LOG_TAG, "Total stores running: " + runningStores);
                 return scStoreStatusEvent.getStatus() == SCDataStoreStatus.SC_DATA_STORE_RUNNING;
             }
         })
