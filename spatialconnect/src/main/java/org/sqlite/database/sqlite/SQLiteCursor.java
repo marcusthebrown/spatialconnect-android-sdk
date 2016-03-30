@@ -20,13 +20,11 @@
 
 package org.sqlite.database.sqlite;
 
-import org.sqlite.database.ExtraUtils;
-
 import android.database.AbstractWindowedCursor;
 import android.database.CursorWindow;
-
-import android.os.StrictMode;
 import android.util.Log;
+
+import org.sqlite.database.ExtraUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,6 +64,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     /** Used to find out where a cursor was allocated in case it never got released. */
     private final Throwable mStackTrace;
 
+    private int mRowIdColumnIndex;
     /**
      * Execute a query and provide access to its result set through a Cursor
      * interface. For a query such as: {@code SELECT name, birth, phone FROM

@@ -16,7 +16,10 @@ package com.boundlessgeo.spatialconnect.test;
 
 import com.boundlessgeo.spatialconnect.services.SCDataService;
 import com.boundlessgeo.spatialconnect.services.SCServiceManager;
+import com.boundlessgeo.spatialconnect.stores.SCDataStore;
 
+import org.junit.After;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -28,9 +31,21 @@ import static junit.framework.Assert.assertTrue;
 
 public class ServicesTest extends BaseTestCase {
 
+    @After
+    public void resetStores() {
+        for (SCDataStore store : SCDataService.getInstance().getAllStores()) {
+            SCDataService.getInstance().unregisterStore(store);
+        }
+    }
+
+    @BeforeClass
+    public static void removeDatabases() throws Exception {
+        testContext.deleteDatabase("Haiti");
+        testContext.deleteDatabase("Whitehorse");
+    }
+
     @Test
     public void testDataServiceInitialization() {
-        System.out.println("Testing data service initialization");
         SCDataService dataService = SCDataService.getInstance();
         assertTrue("The data service should have 2 supported stores.", dataService.getSupportedStoreKeys().size() == 2);
     }

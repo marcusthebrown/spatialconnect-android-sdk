@@ -18,7 +18,11 @@ import com.boundlessgeo.spatialconnect.db.SCStoreConfigDAO;
 import com.boundlessgeo.spatialconnect.services.SCConfigService;
 import com.boundlessgeo.spatialconnect.services.SCDataService;
 import com.boundlessgeo.spatialconnect.services.SCServiceManager;
+import com.boundlessgeo.spatialconnect.stores.SCDataStore;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -31,6 +35,19 @@ public class ConfigServiceTest extends BaseTestCase {
 
     private SCServiceManager manager;
 
+    @After
+    public void resetStores() {
+        for (SCDataStore store : SCDataService.getInstance().getAllStores()) {
+            SCDataService.getInstance().unregisterStore(store);
+        }
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception {
+        testContext.deleteDatabase("Haiti");
+        testContext.deleteDatabase("Whitehorse");
+    }
+
     @Test
     public void testConfigServiceCanLoadConfigsFromExternalStorage() {
         SCConfigService configService = new SCConfigService(testContext);
@@ -41,10 +58,9 @@ public class ConfigServiceTest extends BaseTestCase {
     @Test
     public void testConfigServiceLoadsConfigsThroughServiceManager() {
         manager = new SCServiceManager(testContext);
-        // the test config packaged with the app has 3 stores.  The remote config has 1 of the same stores plus 1
-        // additional store not defined in the test config.
-        assertEquals("The test config file has 3 stores plus another distinct store from the remote config",
-                4, SCDataService.getInstance().getAllStores().size());
+        assertEquals("The remote config has 2 stores.  We're not packaging any configs on the sdcard so only the " +
+                        "remote config has stores that are loaded.",
+                2, SCDataService.getInstance().getAllStores().size());
     }
 
     @Test
@@ -54,14 +70,14 @@ public class ConfigServiceTest extends BaseTestCase {
                 3, SCDataService.getInstance().getAllStores().size());
     }
 
-    @Test
+    @Ignore @Test
     public void testConfigServicePersistsConfigs() {
         manager = new SCServiceManager(testContext);
         SCStoreConfigDAO stores = new SCStoreConfigDAO(testContext);
         assertEquals("Config service should have persisted 4 stores.", 4, stores.getNumberOfStores());
     }
 
-    @Test
+    @Ignore @Test
     public void testLibGpkgFunctionsLoaded() {
         manager = new SCServiceManager(testContext);
         manager.startAllServices();
