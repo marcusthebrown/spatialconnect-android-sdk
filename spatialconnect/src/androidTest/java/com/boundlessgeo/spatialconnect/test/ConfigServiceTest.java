@@ -24,6 +24,8 @@ import static junit.framework.Assert.assertEquals;
 
 public class ConfigServiceTest extends BaseTestCase {
 
+    private SCServiceManager manager;
+
     @Test
     public void testConfigServiceCanLoadConfigsFromExternalStorage() {
         SCConfigService configService = new SCConfigService(testContext);
@@ -33,7 +35,7 @@ public class ConfigServiceTest extends BaseTestCase {
 
     @Test
     public void testConfigServiceLoadsConfigsThroughServiceManager() {
-        SCServiceManager manager = new SCServiceManager(testContext);
+        manager = new SCServiceManager(testContext);
         // the test config packaged with the app has 3 stores.  The remote config has 1 of the same stores plus 1
         // additional store not defined in the test config.
         assertEquals("The test config file has 3 stores plus another distinct store from the remote config",
@@ -42,7 +44,7 @@ public class ConfigServiceTest extends BaseTestCase {
 
     @Test
     public void testConfigServiceLoadsConfigsThroughServiceManagerWithOptionalConstructor() {
-        SCServiceManager manager = new SCServiceManager(testContext, testConfigFile);
+        manager = new SCServiceManager(testContext, testConfigFile);
         assertEquals("It should only have loaded the 3 stores from the config file.",
                 3, SCDataService.getInstance().getAllStores().size());
     }

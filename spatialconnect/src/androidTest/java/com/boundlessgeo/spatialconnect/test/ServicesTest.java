@@ -30,6 +30,7 @@ public class ServicesTest extends BaseTestCase {
 
     @Test
     public void testDataServiceInitialization() {
+        System.out.println("Testing data service initialization");
         SCDataService dataService = SCDataService.getInstance();
         assertTrue("The data service should have 2 supported stores.", dataService.getSupportedStoreKeys().size() == 2);
     }
@@ -57,9 +58,12 @@ public class ServicesTest extends BaseTestCase {
         SCServiceManager serviceManager = new SCServiceManager(activity, testConfigFile);
         serviceManager.startAllServices();
         TestSubscriber testSubscriber = new TestSubscriber();
-        // timeout if all stores don't start in 3 minutes
-        serviceManager.getDataService().allStoresStartedObs().timeout(3, TimeUnit.MINUTES).subscribe(testSubscriber);
+        // timeout if all stores don't start in 10 minutes
+        serviceManager.getDataService().allStoresStartedObs().timeout(10, TimeUnit.MINUTES).subscribe(testSubscriber);
         testSubscriber.awaitTerminalEvent();
+        if (testSubscriber.getOnErrorEvents().size() > 0) {
+            System.out.println("The error was: " + ((Throwable)testSubscriber.getOnErrorEvents().get(0)).getMessage());
+        }
         testSubscriber.assertNoValues();
         testSubscriber.assertNoErrors();
         testSubscriber.assertCompleted();

@@ -48,6 +48,8 @@ public abstract class BaseTestCase {
      */
     protected static File testConfigFile;
 
+    public BaseTestCase() {
+    }
 
     @ClassRule
     public static ActivityTestRule<SpatialConnectActivity> rule = new ActivityTestRule<>(SpatialConnectActivity.class);
