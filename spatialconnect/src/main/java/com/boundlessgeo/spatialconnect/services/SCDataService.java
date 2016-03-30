@@ -105,12 +105,14 @@ public class SCDataService extends SCService {
                 Log.d(LOG_TAG, "Total stores running: " + runningStores);
                 return scStoreStatusEvent.getStatus() == SCDataStoreStatus.SC_DATA_STORE_RUNNING;
             }
-        })
-                .buffer(storesCount).take(1).subscribe(new Action1<List<SCStoreStatusEvent>>() {
+        }).buffer(storesCount).take(1).subscribe(new Action1<List<SCStoreStatusEvent>>() {
             @Override
             public void call(List<SCStoreStatusEvent> l) {
                 // when all stores have started, send the SC_DATA_SERVICE_ALLSTORESSTARTED status
-                SCStoreStatusEvent se = new SCStoreStatusEvent(SCDataStoreStatus.SC_DATA_SERVICE_ALLSTORESSTARTED, null);
+                SCStoreStatusEvent se = new SCStoreStatusEvent(
+                        SCDataStoreStatus.SC_DATA_SERVICE_ALLSTORESSTARTED,
+                        "All stores"
+                );
                 storeEventSubject.onNext(se);
             }
         });

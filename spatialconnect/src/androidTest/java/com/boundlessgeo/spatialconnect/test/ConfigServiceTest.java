@@ -14,11 +14,16 @@
  */
 package com.boundlessgeo.spatialconnect.test;
 
+import com.boundlessgeo.spatialconnect.db.SCStoreConfigDAO;
 import com.boundlessgeo.spatialconnect.services.SCConfigService;
 import com.boundlessgeo.spatialconnect.services.SCDataService;
 import com.boundlessgeo.spatialconnect.services.SCServiceManager;
 
 import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
+
+import rx.observers.TestSubscriber;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -47,6 +52,30 @@ public class ConfigServiceTest extends BaseTestCase {
         manager = new SCServiceManager(testContext, testConfigFile);
         assertEquals("It should only have loaded the 3 stores from the config file.",
                 3, SCDataService.getInstance().getAllStores().size());
+    }
+
+    @Test
+    public void testConfigServicePersistsConfigs() {
+        manager = new SCServiceManager(testContext);
+        SCStoreConfigDAO stores = new SCStoreConfigDAO(testContext);
+        assertEquals("Config service should have persisted 4 stores.", 4, stores.getNumberOfStores());
+    }
+
+    @Test
+    public void testLibGpkgFunctionsLoaded() {
+        manager = new SCServiceManager(testContext);
+        manager.startAllServices();
+//        waitForAllStoresToStart();
+//                .executeSql("SELECT ST_AsText(the_geom) FROM point_features LIMIT 1;");
+//                .executeSql("SELECT CreateSpatialIndex('point_features', 'the_geom', 'id');");
+    }
+
+    private void waitForAllStoresToStart() {
+        TestSubscriber testSubscriber = new TestSubscriber();
+        manager.getDataService().allStoresStartedObs().timeout(10, TimeUnit.MINUTES).subscribe(testSubscriber);
+        testSubscriber.awaitTerminalEvent();
+        testSubscriber.assertNoErrors();
+        testSubscriber.assertCompleted();
     }
 
     // TODO: test erroneous config files
