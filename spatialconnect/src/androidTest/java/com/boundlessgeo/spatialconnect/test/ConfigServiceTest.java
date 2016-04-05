@@ -67,11 +67,12 @@ public class ConfigServiceTest extends BaseTestCase {
                 3, SCDataService.getInstance().getAllStores().size());
     }
 
-    @Ignore @Test
+    @Test
     public void testConfigServicePersistsConfigs() {
         manager = new SCServiceManager(testContext);
         SCStoreConfigDAO stores = new SCStoreConfigDAO(testContext);
-        assertEquals("Config service should have persisted 4 stores.", 4, stores.getNumberOfStores());
+        assertEquals("Config service should have persisted 2 stores (from the remote location).",
+                2, stores.getNumberOfStores());
     }
 
     @Ignore @Test

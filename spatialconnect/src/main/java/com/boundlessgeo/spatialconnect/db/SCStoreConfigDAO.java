@@ -15,75 +15,28 @@
 
 package com.boundlessgeo.spatialconnect.db;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.util.Log;
 
 import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
 
-import org.sqlite.database.SQLException;
-import org.sqlite.database.sqlite.SQLiteDatabase;
-
 public class SCStoreConfigDAO {
 
-    private SQLiteDatabase db;
-    private SCSqliteHelper dbHelper;
+    private KeyValueDAO keyValueDAO;
 
     public SCStoreConfigDAO(Context context) {
-        dbHelper = SCSqliteHelper.getInstance(context);
-    }
-
-    public void open() throws SQLException {
-        db = dbHelper.getWritableDatabase();
-    }
-
-    public void close() {
-        dbHelper.close();
+        keyValueDAO = new KeyValueDAO(context);
     }
 
     public void addStore(SCStoreConfig store) {
-        this.open();
-        // persist store config
-        db.beginTransaction();
-        try {
-            ContentValues values = new ContentValues();
-            values.put("storeID", store.getUniqueID());
-            values.put("type", store.getType());
-            values.put("version", store.getVersion());
-            values.put("name", store.getName());
-            values.put("uri", store.getUri());
-            // Notice how we haven't specified the primary key. SQLite auto increments the primary key column.
-            db.insertOrThrow("stores", null, values);
-            db.setTransactionSuccessful();
-        }
-        catch (Exception e) {
-            Log.d(SCSqliteHelper.class.getSimpleName(), "Error while trying to add store to database");
-        }
-        finally {
-            db.endTransaction();
-            this.close();
-        }
+        String storePrefix = "stores." + store.getUniqueID() + ".";
+        keyValueDAO.put(storePrefix + "id", store.getUniqueID());
+        keyValueDAO.put(storePrefix + "type", store.getType());
+        keyValueDAO.put(storePrefix + "version", store.getVersion());
+        keyValueDAO.put(storePrefix + "name", store.getName());
+        keyValueDAO.put(storePrefix + "uri", store.getUri());
     }
 
     public int getNumberOfStores() {
-        this.open();
-        int count = 0;
-        db.beginTransaction();
-        try {
-            Cursor cursor = db.rawQuery("select count(*) from stores", null);
-            cursor.moveToFirst();
-            count = cursor.getInt(0);
-            cursor.close();
-            db.setTransactionSuccessful();
-        }
-        catch (Exception e) {
-            Log.d(SCSqliteHelper.class.getSimpleName(), "Error while trying to get number of stores");
-        }
-        finally {
-            db.endTransaction();
-            this.close();
-        }
-        return count;
+        return keyValueDAO.getValuesForKeyPrefix("stores.%.id").size();
     }
 }
