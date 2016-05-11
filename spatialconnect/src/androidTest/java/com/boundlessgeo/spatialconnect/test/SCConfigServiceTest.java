@@ -16,7 +16,7 @@ package com.boundlessgeo.spatialconnect.test;
 
 import com.boundlessgeo.spatialconnect.db.SCKVPStore;
 import com.boundlessgeo.spatialconnect.db.SCStoreConfigRepository;
-import com.boundlessgeo.spatialconnect.services.SCServiceManager;
+import com.boundlessgeo.spatialconnect.SpatialConnect;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,7 +30,7 @@ import static junit.framework.Assert.assertEquals;
 
 public class SCConfigServiceTest extends BaseTestCase {
 
-    private SCServiceManager manager;
+    private SpatialConnect sc;
     private final static String HAITI_GPKG_ID = "a5d93796-5026-46f7-a2ff-e5dec85heh6b";
     private final static String WHITEHORSE_GPKG_ID = "ba293796-5026-46f7-a2ff-e5dec85heh6b";
 
@@ -49,19 +49,19 @@ public class SCConfigServiceTest extends BaseTestCase {
     }
 
     @Test
-    public void testServiceManagerCanLoadNonDefaultConfigs() {
-        manager = new SCServiceManager(testContext);
-        manager.addConfig(testConfigFile);
-        manager.startAllServices();
+    public void testSpatialConnectCanLoadNonDefaultConfigs() {
+        sc = new SpatialConnect(testContext);
+        sc.addConfig(testConfigFile);
+        sc.startAllServices();
         waitForStoreToStart(WHITEHORSE_GPKG_ID);
-        assertEquals("The test config file has 3 stores.", 3, manager.getDataService().getAllStores().size());
+        assertEquals("The test config file has 3 stores.", 3, sc.getDataService().getAllStores().size());
     }
 
     @Test
     public void testConfigServicePersistsConfigs() {
-        manager = new SCServiceManager(testContext);
-        manager.startAllServices();
-        manager.loadDefaultConfigs();
+        sc = new SpatialConnect(testContext);
+        sc.startAllServices();
+        sc.loadDefaultConfigs();
         // the remote config doesn't have the whitehorse gpkg so we wait for haiti
         waitForStoreToStart(HAITI_GPKG_ID);
         SCStoreConfigRepository stores = new SCStoreConfigRepository(testContext);
@@ -74,7 +74,7 @@ public class SCConfigServiceTest extends BaseTestCase {
 
     private void waitForStoreToStart(final String storeId) {
         TestSubscriber testSubscriber = new TestSubscriber();
-        manager.getDataService().storeStarted(storeId).timeout(1, TimeUnit.MINUTES).subscribe(testSubscriber);
+        sc.getDataService().storeStarted(storeId).timeout(1, TimeUnit.MINUTES).subscribe(testSubscriber);
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertNoErrors();
         testSubscriber.assertCompleted();

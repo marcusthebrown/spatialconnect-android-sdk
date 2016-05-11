@@ -3,7 +3,7 @@ package com.boundlessgeo.spatialconnect.test;
 import android.database.Cursor;
 
 import com.boundlessgeo.spatialconnect.db.SCSqliteHelper;
-import com.boundlessgeo.spatialconnect.services.SCServiceManager;
+import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.squareup.sqlbrite.BriteDatabase;
 
 import org.junit.AfterClass;
@@ -19,15 +19,15 @@ import static junit.framework.Assert.assertTrue;
 
 public class SCSqliteHelperTest extends BaseTestCase {
 
-    private static SCServiceManager serviceManager;
+    private static SpatialConnect sc;
     private final static String HAITI_GPKG_ID = "a5d93796-5026-46f7-a2ff-e5dec85heh6b";
     private static BriteDatabase haiti;
 
     @BeforeClass
     public static void setUp() throws Exception {
-        serviceManager = new SCServiceManager(activity);
-        serviceManager.addConfig(testConfigFile);
-        serviceManager.startAllServices();
+        sc = new SpatialConnect(activity);
+        sc.addConfig(testConfigFile);
+        sc.startAllServices();
         waitForStoreToStart(HAITI_GPKG_ID);
         haiti = new SCSqliteHelper(testContext, "Haiti").db();
     }
@@ -40,7 +40,7 @@ public class SCSqliteHelperTest extends BaseTestCase {
 
     private static void waitForStoreToStart(final String storeId) {
         TestSubscriber testSubscriber = new TestSubscriber();
-        serviceManager.getDataService().storeStarted(storeId).timeout(5, TimeUnit.MINUTES).subscribe(testSubscriber);
+        sc.getDataService().storeStarted(storeId).timeout(5, TimeUnit.MINUTES).subscribe(testSubscriber);
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertNoErrors();
         testSubscriber.assertCompleted();

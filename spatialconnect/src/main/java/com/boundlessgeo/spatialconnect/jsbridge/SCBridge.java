@@ -12,7 +12,7 @@ import com.boundlessgeo.spatialconnect.query.SCGeometryPredicateComparison;
 import com.boundlessgeo.spatialconnect.query.SCPredicate;
 import com.boundlessgeo.spatialconnect.query.SCQueryFilter;
 import com.boundlessgeo.spatialconnect.services.SCSensorService;
-import com.boundlessgeo.spatialconnect.services.SCServiceManager;
+import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.stores.SCDataStore;
 import com.boundlessgeo.spatialconnect.stores.SCKeyTuple;
 import com.facebook.react.bridge.Arguments;
@@ -39,13 +39,13 @@ import rx.schedulers.Schedulers;
 public class SCBridge extends ReactContextBaseJavaModule {
 
     private final String LOG_TAG = SCBridge.class.getSimpleName();
-    private SCServiceManager manager;
+    private SpatialConnect manager;
     private ReactContext reactContext;
 
     public SCBridge(ReactApplicationContext reactContext) {
         super(reactContext);
         // TODO: this should be a singleton with a getInstance() method or injected with dagger
-        this.manager = new SCServiceManager(reactContext.getApplicationContext());
+        this.manager = new SpatialConnect(reactContext.getApplicationContext());
         this.manager.startAllServices();
         this.manager.loadDefaultConfigs();
         this.reactContext = reactContext;
@@ -332,6 +332,7 @@ public class SCBridge extends ReactContextBaseJavaModule {
                                         // base64 encode id and set it before sending across wire
                                         String encodedId = ((SCGeometry) feature).getKey().encodedCompositeKey();
                                         feature.setId(encodedId);
+                                        // features are sent as GeoJSON strings so the Javascript can easily parse
                                         sendEvent("createFeature", ((SCGeometry) feature).toJson());
                                     } catch (UnsupportedEncodingException e) {
                                         e.printStackTrace();
