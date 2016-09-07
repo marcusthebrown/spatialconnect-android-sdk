@@ -17,7 +17,6 @@ package com.boundlessgeo.spatialconnect.jsbridge;
 import android.location.Location;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.config.SCFormConfig;
 import com.boundlessgeo.spatialconnect.config.SCFormField;
@@ -25,12 +24,15 @@ import com.boundlessgeo.spatialconnect.geometries.SCBoundingBox;
 import com.boundlessgeo.spatialconnect.geometries.SCGeometry;
 import com.boundlessgeo.spatialconnect.geometries.SCGeometryFactory;
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
+import com.boundlessgeo.spatialconnect.mqtt.QoS;
+import com.boundlessgeo.spatialconnect.mqtt.SCNotification;
 import com.boundlessgeo.spatialconnect.query.SCGeometryPredicateComparison;
 import com.boundlessgeo.spatialconnect.query.SCPredicate;
 import com.boundlessgeo.spatialconnect.query.SCQueryFilter;
+import com.boundlessgeo.spatialconnect.schema.SCMessageOuterClass;
 import com.boundlessgeo.spatialconnect.services.SCAuthService;
+import com.boundlessgeo.spatialconnect.services.SCBackendService;
 import com.boundlessgeo.spatialconnect.services.SCSensorService;
-import com.boundlessgeo.spatialconnect.stores.DefaultStore;
 import com.boundlessgeo.spatialconnect.stores.SCDataStore;
 import com.boundlessgeo.spatialconnect.stores.SCDataStoreStatus;
 import com.boundlessgeo.spatialconnect.stores.SCKeyTuple;
@@ -48,17 +50,18 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-
 import rx.Subscriber;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -72,6 +75,8 @@ public class SCBridge extends ReactContextBaseJavaModule {
     private static final String LOG_TAG = SCBridge.class.getSimpleName();
     private final SpatialConnect sc;
     private final ReactContext reactContext;
+    private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
 
     public SCBridge(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -266,7 +271,26 @@ public class SCBridge extends ReactContextBaseJavaModule {
             if (command.equals(BridgeCommand.AUTHSERVICE_LOGOUT)) {
                 handleLogout(message);
             }
+            if (command.equals(BridgeCommand.NOTIFICATIONS)) {
+                handleNotificationSubscribe(message);
+            }
         }
+    }
+
+    private void handleNotificationSubscribe(final ReadableMap message) {
+        Log.d(LOG_TAG, "Subscribing to notifications");
+        SCBackendService.notifications.subscribe(new Action1<SCNotification>() {
+            @Override
+            public void call(SCNotification scNotification) {
+                try {
+                    sendEvent(message.getInt("type"), convertJsonToMap(scNotification.toJson()));
+                }
+                catch (JSONException e) {
+                    Log.w(LOG_TAG, "Could not parse notification");
+                }
+            }
+        });
+        SCBackendService.notifications.connect();
     }
 
     private void handleLogout(ReadableMap message) {
