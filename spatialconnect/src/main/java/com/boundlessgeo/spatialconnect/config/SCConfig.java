@@ -17,6 +17,7 @@ package com.boundlessgeo.spatialconnect.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SCConfig {
@@ -31,6 +32,8 @@ public class SCConfig {
     private SCRemoteConfig remote;
 
     public SCConfig() {
+        this.stores = new ArrayList<>();
+        this.layers = new ArrayList<>();
     }
 
     public List<SCStoreConfig> getStores() {

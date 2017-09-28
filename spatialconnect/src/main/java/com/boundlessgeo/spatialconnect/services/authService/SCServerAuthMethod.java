@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.boundlessgeo.spatialconnect.scutilities.HttpHandler;
+import com.boundlessgeo.spatialconnect.stores.WFSStore;
 import com.github.rtoshiro.secure.SecureSharedPreferences;
 
 import org.json.JSONException;

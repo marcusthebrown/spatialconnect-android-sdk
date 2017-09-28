@@ -73,7 +73,7 @@ public class SpatialConnect {
      * @param context
      */
     public void initialize(Context context) {
-        Log.d(LOG_TAG, "Initializing SpatialConnect");
+        Log.d(LOG_TAG, "Initializing SpatialConnect version 0.13.0");
         serviceGraph = new SCServiceGraph();
         this.sensorService = new SCSensorService(context);
         this.dataService = new SCDataService(context);

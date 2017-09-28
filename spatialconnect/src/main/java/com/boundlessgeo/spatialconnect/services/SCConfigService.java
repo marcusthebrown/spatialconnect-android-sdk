@@ -26,6 +26,7 @@ import com.boundlessgeo.spatialconnect.config.SCRemoteConfig;
 import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
 import com.boundlessgeo.spatialconnect.scutilities.Json.SCObjectMapper;
 import com.boundlessgeo.spatialconnect.scutilities.Storage.SCFileUtilities;
+import com.boundlessgeo.spatialconnect.services.authService.ExchangeAuthMethod;
 import com.boundlessgeo.spatialconnect.services.authService.NoAuth;
 import com.boundlessgeo.spatialconnect.services.authService.SCServerAuthMethod;
 import com.boundlessgeo.spatialconnect.stores.FormStore;
@@ -35,8 +36,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import okhttp3.Credentials;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import static com.boundlessgeo.spatialconnect.scutilities.Json.SCObjectMapper.getMapper;
 import static java.util.Arrays.asList;
 
 /**
@@ -54,10 +67,17 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
     private List<String> configPaths = new ArrayList<>();
     private SpatialConnect sc;
     private SCDataService dataService;
+    private OkHttpClient client;
+    private String clientId = "";
+    private String clientSecret = "";
+
 
     public SCConfigService(Context context) {
         this.context = context;
         sc = SpatialConnect.getInstance();
+        this.client = new OkHttpClient.Builder()
+            .readTimeout(2, TimeUnit.MINUTES)
+            .build();
     }
 
     /**
@@ -109,12 +129,51 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
         SCRemoteConfig remoteConfig = config.getRemote();
         if (remoteConfig != null) {
             String auth = remoteConfig.getAuth();
-            if ( !TextUtils.isEmpty(auth) && auth.equals("no-auth")) {
+            if (!TextUtils.isEmpty(auth) && auth.equals("no-auth")) {
                 sc.connectAuth(new NoAuth());
+                sc.connectBackend(remoteConfig);
+            } else if (!TextUtils.isEmpty(auth) && auth.equals("exchange-auth")) {
+                sc.connectAuth(new ExchangeAuthMethod(context, remoteConfig.getHttpUri()));
+                // if you are using exchange auth, you don't need mqtt,
+                // so you never need to connect a backend
+                loadLayersFromExchange(config);
             } else {
                 sc.connectAuth(new SCServerAuthMethod(context, remoteConfig.getHttpUri()));
+                sc.connectBackend(remoteConfig);
             }
-            sc.connectBackend(remoteConfig);
+        }
+    }
+
+    private void loadLayersFromExchange(SCConfig config) {
+        // gets layers from exchange that the user has write permissions for
+        // final String theUrl = String.format(Locale.US, "%s/some/endpoint/", exchangeRootUrl);
+        final String theUrl = "http://undemo.boundlessgeo.io:8084/layers";
+        Request request = new Request.Builder()
+            .url(theUrl)
+            .addHeader("Authorization", Credentials.basic(clientId, clientSecret))
+            .get()
+            .build();
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()) {
+                JSONArray layers = new JSONArray(response.body().string());
+                for (int i = 0; i < layers.length(); i++) {
+                    SCLayerConfig layerConfig = getMapper().readValue(
+                        layers.getJSONObject(i).toString(),
+                        SCLayerConfig.class
+                    );
+                    config.addLayer(layerConfig);
+                    SpatialConnect.getInstance().getDataService().getFormStore()
+                        .registerFormByConfig(layerConfig);
+                }
+                // parse list of layers
+                // SCBackendService.configReceived.onNext(true);
+                SpatialConnect.getInstance().getConfigService().setCachedConfig(config);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
