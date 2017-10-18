@@ -19,7 +19,6 @@ import com.boundlessgeo.spatialconnect.scutilities.Json.SCObjectMapper;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;

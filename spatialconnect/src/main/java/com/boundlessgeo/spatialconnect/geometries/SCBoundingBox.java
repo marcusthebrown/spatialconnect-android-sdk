@@ -15,11 +15,9 @@
 package com.boundlessgeo.spatialconnect.geometries;
 
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.scutilities.Json.SCObjectMapper;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vividsolutions.jts.geom.Envelope;
-
 import java.io.File;
 
 public class SCBoundingBox

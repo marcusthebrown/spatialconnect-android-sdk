@@ -14,13 +14,11 @@
  */
 package com.boundlessgeo.spatialconnect.services;
 
-
 import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
 import android.net.NetworkInfo;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.geometries.SCPoint;
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
@@ -33,10 +31,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
 import java.util.List;
 import java.util.Map;
-
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;

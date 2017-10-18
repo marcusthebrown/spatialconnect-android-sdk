@@ -14,10 +14,8 @@
  */
 package com.boundlessgeo.spatialconnect.stores;
 
-
 import android.content.Context;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
 import com.boundlessgeo.spatialconnect.geometries.SCGeometry;
@@ -26,9 +24,6 @@ import com.boundlessgeo.spatialconnect.geometries.SCGeometryFactory;
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
 import com.boundlessgeo.spatialconnect.query.SCQueryFilter;
 import com.boundlessgeo.spatialconnect.style.SCStyle;
-
-import org.apache.commons.io.FileUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +32,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-
+import org.apache.commons.io.FileUtils;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;

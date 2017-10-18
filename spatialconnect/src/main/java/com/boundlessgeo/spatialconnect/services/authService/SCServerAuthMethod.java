@@ -18,16 +18,12 @@ package com.boundlessgeo.spatialconnect.services.authService;
 
 import android.content.Context;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.scutilities.HttpHandler;
 import com.github.rtoshiro.secure.SecureSharedPreferences;
-
+import java.util.Locale;
+import okhttp3.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Locale;
-
-import okhttp3.Response;
 
 public class SCServerAuthMethod implements ISCAuth {
 

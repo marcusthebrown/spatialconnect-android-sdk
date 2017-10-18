@@ -17,11 +17,9 @@
 package com.boundlessgeo.spatialconnect.services ;
 
 import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import rx.observables.ConnectableObservable;
 import rx.subjects.PublishSubject;
 

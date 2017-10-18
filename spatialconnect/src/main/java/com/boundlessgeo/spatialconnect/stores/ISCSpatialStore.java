@@ -14,12 +14,9 @@
  */
 package com.boundlessgeo.spatialconnect.stores;
 
-
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
 import com.boundlessgeo.spatialconnect.query.SCQueryFilter;
-
 import java.util.List;
-
 import rx.Observable;
 
 /**

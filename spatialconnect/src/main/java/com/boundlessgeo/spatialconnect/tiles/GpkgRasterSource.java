@@ -6,7 +6,6 @@ import com.boundlessgeo.spatialconnect.stores.SCRasterStore;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
-
 import java.util.List;
 import java.util.Map;
 

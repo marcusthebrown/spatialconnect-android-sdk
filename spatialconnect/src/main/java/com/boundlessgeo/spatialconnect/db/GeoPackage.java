@@ -3,15 +3,11 @@ package com.boundlessgeo.spatialconnect.db;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
 import com.boundlessgeo.spatialconnect.tiles.SCGpkgTileSource;
 import com.boundlessgeo.spatialconnect.tiles.SCTileMatrixRow;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.QueryObservable;
-
-import org.sqlite.database.SQLException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,7 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import org.sqlite.database.SQLException;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;

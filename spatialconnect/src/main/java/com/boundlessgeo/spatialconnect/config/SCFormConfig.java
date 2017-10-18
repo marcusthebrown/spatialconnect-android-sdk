@@ -1,9 +1,6 @@
 package com.boundlessgeo.spatialconnect.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 

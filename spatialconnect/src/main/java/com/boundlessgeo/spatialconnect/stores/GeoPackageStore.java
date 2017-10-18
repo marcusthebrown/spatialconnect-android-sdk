@@ -17,7 +17,6 @@ package com.boundlessgeo.spatialconnect.stores;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
 import com.boundlessgeo.spatialconnect.db.GeoPackage;
 import com.boundlessgeo.spatialconnect.db.GeoPackageContents;
@@ -39,9 +38,6 @@ import com.squareup.sqlbrite.SqlBrite;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
-
-import org.sqlite.database.SQLException;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -55,7 +51,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
+import org.sqlite.database.SQLException;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;

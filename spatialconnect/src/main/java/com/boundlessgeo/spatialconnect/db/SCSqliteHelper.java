@@ -18,16 +18,12 @@ package com.boundlessgeo.spatialconnect.db;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
-
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
-
+import java.io.File;
 import org.sqlite.database.DatabaseErrorHandler;
 import org.sqlite.database.sqlite.SQLiteDatabase;
 import org.sqlite.database.sqlite.SQLiteOpenHelper;
-
-import java.io.File;
-
 import rx.schedulers.Schedulers;
 
 /**

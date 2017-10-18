@@ -15,13 +15,10 @@
 package com.boundlessgeo.spatialconnect.mqtt;
 
 import android.util.Log;
-
 import com.boundlessgeo.schema.MessagePbf;
-
+import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
 
 public class SCNotification {
 

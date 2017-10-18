@@ -16,7 +16,6 @@ package com.boundlessgeo.spatialconnect.jsbridge;
 
 import android.location.Location;
 import android.util.Log;
-
 import com.boundlessgeo.schema.Actions;
 import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.geometries.SCBoundingBox;
@@ -35,11 +34,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-
 import rx.Subscriber;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;

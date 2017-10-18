@@ -14,7 +14,6 @@
  */
 package com.boundlessgeo.spatialconnect.scutilities;
 
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -26,9 +25,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-
 import com.google.android.gms.maps.GoogleMap;
-
 import rx.Observable;
 import rx.subjects.AsyncSubject;
 import rx.subjects.PublishSubject;

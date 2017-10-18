@@ -15,20 +15,15 @@
 package com.boundlessgeo.spatialconnect.tiles;
 
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.db.GeoPackage;
 import com.boundlessgeo.spatialconnect.db.GeoPackageContents;
 import com.boundlessgeo.spatialconnect.geometries.SCBoundingBox;
 import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileProvider;
-
-import org.sqlite.database.SQLException;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.sqlite.database.SQLException;
 
 /**
  * This class is responsible for reading tile data from a GeoPackage.  It stores information from

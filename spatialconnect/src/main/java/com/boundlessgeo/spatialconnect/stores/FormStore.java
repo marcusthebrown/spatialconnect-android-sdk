@@ -19,20 +19,16 @@ package com.boundlessgeo.spatialconnect.stores;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.config.SCFormConfig;
 import com.boundlessgeo.spatialconnect.config.SCFormField;
 import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
 import com.boundlessgeo.spatialconnect.scutilities.Json.JsonUtilities;
 import com.boundlessgeo.spatialconnect.style.SCStyle;
-import com.fasterxml.jackson.databind.JsonNode;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import rx.Observable;
 import rx.subjects.BehaviorSubject;
 

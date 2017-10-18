@@ -1,10 +1,7 @@
 package com.boundlessgeo.spatialconnect.config;
 
 import android.text.TextUtils;
-
 import com.boundlessgeo.spatialconnect.scutilities.Json.JsonUtilities;
-import com.fasterxml.jackson.databind.JsonNode;
-
 import java.util.HashMap;
 
 public class SCFormField {

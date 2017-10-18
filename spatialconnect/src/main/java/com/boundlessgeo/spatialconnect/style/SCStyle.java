@@ -16,10 +16,8 @@
 package com.boundlessgeo.spatialconnect.style;
 
 import android.util.Log;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-
 import java.util.HashMap;
 
 public class SCStyle {

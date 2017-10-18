@@ -16,9 +16,7 @@
 package com.boundlessgeo.spatialconnect.stores;
 
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
-
 import java.util.Map;
-
 import rx.Observable;
 
 public interface ISyncableStore {

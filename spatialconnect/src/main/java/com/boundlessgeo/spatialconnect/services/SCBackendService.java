@@ -14,11 +14,9 @@
  */
 package com.boundlessgeo.spatialconnect.services;
 
-
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
-
 import com.boundlessgeo.schema.Actions;
 import com.boundlessgeo.schema.MessagePbf;
 import com.boundlessgeo.spatialconnect.SpatialConnect;
@@ -37,14 +35,11 @@ import com.boundlessgeo.spatialconnect.stores.ISyncableStore;
 import com.boundlessgeo.spatialconnect.stores.SCDataStore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.protobuf.Timestamp;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
+import org.json.JSONException;
+import org.json.JSONObject;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;

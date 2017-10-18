@@ -15,13 +15,10 @@
 package com.boundlessgeo.spatialconnect.services.authService;
 
 import android.content.Context;
-
 import com.boundlessgeo.spatialconnect.services.SCService;
 import com.boundlessgeo.spatialconnect.services.SCServiceLifecycle;
-
 import java.util.List;
 import java.util.Map;
-
 import rx.subjects.BehaviorSubject;
 
 public class SCAuthService extends SCService implements SCServiceLifecycle {

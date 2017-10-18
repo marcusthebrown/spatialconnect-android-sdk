@@ -1,11 +1,9 @@
 package com.boundlessgeo.spatialconnect.stores;
 
 import android.content.Context;
-
 import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
 import com.boundlessgeo.spatialconnect.services.SCSensorService;
-
 import rx.Observable;
 import rx.functions.Action1;
 

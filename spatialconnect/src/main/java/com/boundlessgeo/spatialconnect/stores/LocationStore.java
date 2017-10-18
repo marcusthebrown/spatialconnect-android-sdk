@@ -19,7 +19,6 @@ package com.boundlessgeo.spatialconnect.stores;
 import android.content.Context;
 import android.location.Location;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
 import com.boundlessgeo.spatialconnect.db.SCGpkgFeatureSource;
@@ -33,10 +32,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import rx.Observable;
 import rx.functions.Action0;
 import rx.functions.Action1;

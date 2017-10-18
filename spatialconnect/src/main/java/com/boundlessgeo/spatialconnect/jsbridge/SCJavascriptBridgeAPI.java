@@ -4,7 +4,6 @@ import android.content.Context;
 import android.location.Location;
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.boundlessgeo.schema.Actions;
 import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.config.SCFormConfig;
@@ -25,17 +24,12 @@ import com.boundlessgeo.spatialconnect.stores.ISCSpatialStore;
 import com.boundlessgeo.spatialconnect.stores.SCDataStore;
 import com.boundlessgeo.spatialconnect.stores.SCKeyTuple;
 import com.boundlessgeo.spatialconnect.stores.SCRasterStore;
-import com.boundlessgeo.spatialconnect.stores.SCStoreStatusEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import rx.Subscriber;
-import rx.functions.Action1;
-import rx.Subscription;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 

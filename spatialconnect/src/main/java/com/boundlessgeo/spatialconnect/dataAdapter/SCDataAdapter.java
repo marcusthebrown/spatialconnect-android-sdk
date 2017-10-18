@@ -14,9 +14,7 @@
  */
 package com.boundlessgeo.spatialconnect.dataAdapter;
 
-
 import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
-
 import rx.Observable;
 
 /**

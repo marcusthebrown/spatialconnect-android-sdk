@@ -15,7 +15,6 @@
 package com.boundlessgeo.spatialconnect.stores;
 
 import android.util.Base64;
-
 import java.io.UnsupportedEncodingException;
 
 public class SCKeyTuple {

@@ -18,7 +18,6 @@ package com.boundlessgeo.spatialconnect.services;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.config.SCConfig;
 import com.boundlessgeo.spatialconnect.config.SCFormConfig;
@@ -30,7 +29,6 @@ import com.boundlessgeo.spatialconnect.services.authService.NoAuth;
 import com.boundlessgeo.spatialconnect.services.authService.SCServerAuthMethod;
 import com.boundlessgeo.spatialconnect.stores.FormStore;
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

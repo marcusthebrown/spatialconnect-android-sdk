@@ -16,7 +16,6 @@ package com.boundlessgeo.spatialconnect.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Locale;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

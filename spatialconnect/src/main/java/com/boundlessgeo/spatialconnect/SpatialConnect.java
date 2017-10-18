@@ -16,7 +16,6 @@ package com.boundlessgeo.spatialconnect;
 
 import android.content.Context;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.config.SCRemoteConfig;
 import com.boundlessgeo.spatialconnect.scutilities.SCCache;
 import com.boundlessgeo.spatialconnect.services.SCBackendService;
@@ -31,9 +30,7 @@ import com.boundlessgeo.spatialconnect.services.SCServiceStatusEvent;
 import com.boundlessgeo.spatialconnect.services.authService.ISCAuth;
 import com.boundlessgeo.spatialconnect.services.authService.SCAuthService;
 import com.github.rtoshiro.secure.SecureSharedPreferences;
-
 import java.util.UUID;
-
 import rx.Observable;
 import rx.functions.Action0;
 import rx.functions.Action1;

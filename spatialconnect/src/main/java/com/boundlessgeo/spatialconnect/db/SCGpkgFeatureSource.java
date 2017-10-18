@@ -3,7 +3,6 @@ package com.boundlessgeo.spatialconnect.db;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.util.Log;
-
 import com.boundlessgeo.spatialconnect.geometries.SCGeometry;
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
 import com.squareup.sqlbrite.BriteDatabase;
@@ -11,7 +10,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,7 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import rx.Observable;
 import rx.Subscriber;
 
