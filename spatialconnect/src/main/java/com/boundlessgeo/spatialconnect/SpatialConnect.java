@@ -19,7 +19,7 @@ import android.util.Log;
 
 import com.boundlessgeo.spatialconnect.config.SCRemoteConfig;
 import com.boundlessgeo.spatialconnect.scutilities.SCCache;
-import com.boundlessgeo.spatialconnect.services.SCBackendService;
+import com.boundlessgeo.spatialconnect.services.ISCBackendService;
 import com.boundlessgeo.spatialconnect.services.SCConfigService;
 import com.boundlessgeo.spatialconnect.services.SCDataService;
 import com.boundlessgeo.spatialconnect.services.SCExchangeBackendService;
@@ -53,7 +53,7 @@ public class SpatialConnect {
     private SCDataService dataService;
     private SCSensorService sensorService;
     private SCConfigService configService;
-    private SCBackendService backendService;
+    private ISCBackendService backendService;
     private SCAuthService authService;
     private SCCache cache;
 
@@ -220,12 +220,13 @@ public class SpatialConnect {
         Log.v(LOG_TAG, "connecting to backend");
         if (remoteConfig.getAuth().equalsIgnoreCase("exchange")) {
             backendService = new SCExchangeBackendService(context);
+            addService((SCExchangeBackendService) backendService);
         } else {
             backendService = new SCMqttBackendService(context);
+            addService((SCMqttBackendService) backendService);
         }
         backendService.initialize(remoteConfig);
-        addService(backendService);
-        startService(backendService.getServiceId());
+        startService(((SCService)backendService).getServiceId());
     }
 
     public void connectAuth(ISCAuth authMethod) {
@@ -245,7 +246,7 @@ public class SpatialConnect {
      */
     public void updateDeviceToken(final String token) {
 
-        serviceRunning(SCBackendService.serviceId()).subscribe(
+        serviceRunning(((SCService)backendService).getServiceId()).subscribe(
                 new Action1<SCServiceStatusEvent>() {
                     @Override
                     public void call(SCServiceStatusEvent scServiceStatusEvent) {}
@@ -255,7 +256,7 @@ public class SpatialConnect {
                 }, new Action0() {
                     @Override
                     public void call() {
-                        ((SCMqttBackendService) backendService).updateDeviceToken(token);
+                        backendService.updateDeviceToken(token);
                     }
                 });
     }
@@ -272,7 +273,7 @@ public class SpatialConnect {
         return configService;
     }
 
-    public SCBackendService getBackendService() {
+    public ISCBackendService getBackendService() {
         return backendService;
     }
 

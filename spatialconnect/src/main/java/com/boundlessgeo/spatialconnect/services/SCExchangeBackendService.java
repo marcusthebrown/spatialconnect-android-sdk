@@ -47,7 +47,7 @@ import static java.util.Arrays.asList;
  * SCExchangeBackendService extends SCBackendService to enable Boundless Exchange to serve as a backend to the
  * spatialconnect-android-sdk.
  */
-public class SCExchangeBackendService extends SCBackendService {
+public class SCExchangeBackendService extends SCService implements ISCBackendService {
 
     private static final String LOG_TAG = SCExchangeBackendService.class.getSimpleName();
     private static final String SERVICE_NAME = "SC_EXCHANGE_BACKEND_SERVICE";
@@ -90,7 +90,7 @@ public class SCExchangeBackendService extends SCBackendService {
                 "%s://%s:%s",
                 config.getHttpProtocol() == null ? "http" : config.getHttpProtocol(),
                 config.getHttpHost() == null ? "localhost" : config.getHttpHost(),
-                config.getHttpPort() == null ? "8000" : config.getHttpPort().toString()
+                config.getHttpPort() == null ? "80" : config.getHttpPort().toString()
         );
     }
 
@@ -122,6 +122,11 @@ public class SCExchangeBackendService extends SCBackendService {
      */
     public Observable<SCNotification> getNotifications() {
         return notifications;
+    }
+
+    @Override
+    public void updateDeviceToken(String token) {
+        throw new UnsupportedOperationException("This method is not implemented yet");
     }
 
     private void loadCachedConfig() {
@@ -206,7 +211,7 @@ public class SCExchangeBackendService extends SCBackendService {
                     try {
                         Log.d(LOG_TAG, "Executing WFS-T Insert request");
                         Response res = HttpHandler.getInstance().postBlocking(
-                                backendUri,
+                                String.format("%s/geoserver/wfs", backendUri),
                                 wfstPayload,
                                 Credentials.basic(auth.username(), auth.getPassword()),
                                 HttpHandler.XML);

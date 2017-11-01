@@ -17,7 +17,7 @@ package com.boundlessgeo.spatialconnect.services;
 
 import com.boundlessgeo.spatialconnect.config.SCRemoteConfig;
 
-public abstract class SCBackendService extends SCService implements SCServiceLifecycle {
+public abstract class BackendService extends SCService implements SCServiceLifecycle {
 
     private static final String SERVICE_NAME = "SC_BACKEND_SERVICE";
 

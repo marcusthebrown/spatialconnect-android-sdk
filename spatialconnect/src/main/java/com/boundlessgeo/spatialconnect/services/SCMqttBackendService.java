@@ -52,7 +52,7 @@ import static java.util.Arrays.asList;
 /**
  * SCMqttBackendService handles any communication with backend services through an MQTT broker.
  */
-public class SCMqttBackendService extends SCBackendService {
+public class SCMqttBackendService extends SCService implements ISCBackendService {
 
     private static final String LOG_TAG = SCMqttBackendService.class.getSimpleName();
     private static final String SERVICE_NAME = "SC_MQTT_BACKEND_SERVICE";
@@ -294,6 +294,7 @@ public class SCMqttBackendService extends SCBackendService {
 
     @Override
     public boolean start(Map<String, SCService> deps) {
+        boolean started = start(deps);
         authService = (SCAuthService) deps.get(SCAuthService.serviceId());
         configService = (SCConfigService) deps.get(SCConfigService.serviceId());
         sensorService = (SCSensorService) deps.get(SCSensorService.serviceId());
@@ -305,7 +306,7 @@ public class SCMqttBackendService extends SCBackendService {
         //connect to backend and grab the latest config
         listenForNetworkConnection();
 
-        return super.start(deps);
+        return started;
     }
 
     @Override
@@ -668,5 +669,9 @@ public class SCMqttBackendService extends SCBackendService {
     @Override
     public String getBackendUri() {
         return backendUri;
+    }
+
+    public static String serviceId() {
+        return SERVICE_NAME;
     }
 }

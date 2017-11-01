@@ -17,7 +17,7 @@ import com.boundlessgeo.spatialconnect.query.SCPredicate;
 import com.boundlessgeo.spatialconnect.query.SCQueryFilter;
 import com.boundlessgeo.spatialconnect.scutilities.Json.JsonUtilities;
 import com.boundlessgeo.spatialconnect.scutilities.Json.SCObjectMapper;
-import com.boundlessgeo.spatialconnect.services.SCBackendService;
+import com.boundlessgeo.spatialconnect.services.ISCBackendService;
 import com.boundlessgeo.spatialconnect.services.SCMqttBackendService;
 import com.boundlessgeo.spatialconnect.services.SCSensorService;
 import com.boundlessgeo.spatialconnect.services.SCServiceStatusEvent;
@@ -440,20 +440,18 @@ public class SCJavascriptBridgeAPI {
             public void onNext(Boolean connected) {
                 if (connected) {
                     final SpatialConnect sc = SpatialConnect.getInstance();
-                    sc.serviceRunning(SCBackendService.serviceId())
+                    sc.serviceRunning(SCMqttBackendService.serviceId())
                             .subscribe(new SubscriberWrapper<SCServiceStatusEvent>(subscriber) {
                                 @Override
                                 public void onNext(SCServiceStatusEvent scServiceStatusEvent) {
-                                    if (sc.getBackendService() instanceof SCMqttBackendService) {
-                                        ((SCMqttBackendService)sc.getBackendService())
-                                                .getNotifications()
-                                                .subscribe(new SubscriberWrapper<SCNotification>(subscriber) {
-                                                    @Override
-                                                    public void onNext(SCNotification scNotification) {
-                                                        this.mSubscriber.onNext(scNotification.toJSON());
-                                                    }
-                                                });
-                                    }
+                                    sc.getBackendService()
+                                            .getNotifications()
+                                            .subscribe(new SubscriberWrapper<SCNotification>(subscriber) {
+                                                @Override
+                                                public void onNext(SCNotification scNotification) {
+                                                    this.mSubscriber.onNext(scNotification.toJSON());
+                                                }
+                                            });
                                 }
                             });
                 }
@@ -466,7 +464,7 @@ public class SCJavascriptBridgeAPI {
      * Handles the {@link Actions#BACKENDSERVICE_HTTP_URI} command.
      */
     private void handleBackendServiceHTTPUri(Subscriber<Object> subscriber) {
-        mSpatialConnect.serviceRunning(SCBackendService.serviceId())
+        mSpatialConnect.serviceRunning(SCMqttBackendService.serviceId())
                 .subscribe(new SubscriberWrapper<SCServiceStatusEvent>(subscriber) {
                     @Override
                     public void onNext(SCServiceStatusEvent scServiceStatusEvent) {
@@ -494,7 +492,7 @@ public class SCJavascriptBridgeAPI {
         };
 
         SpatialConnect sc = SpatialConnect.getInstance();
-        SCBackendService backendService = sc.getBackendService();
+        ISCBackendService backendService = sc.getBackendService();
         if (backendService != null && backendService instanceof SCMqttBackendService) {
             ((SCMqttBackendService) backendService)
                     .connectedToBroker
