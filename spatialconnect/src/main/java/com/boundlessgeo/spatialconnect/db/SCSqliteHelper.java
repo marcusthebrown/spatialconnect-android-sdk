@@ -42,7 +42,7 @@ public class SCSqliteHelper extends SQLiteOpenHelper {
      * A list of keywords used by Sqlite that we cannot use as table or column names.
      * https://www.sqlite.org/lang_keywords.html
      */
-    public static final List<String> SQLITE_KEYWORDS = Arrays.asList(("ABORT,ACTION,ADD,AFTER,"
+    public static final List<String> SQLITE_KEYWORDS = Arrays.asList("ABORT,ACTION,ADD,AFTER,"
         + "ALL,ALTER,ANALYZE,AND,AS,ASC,ATTACH,AUTOINCREMENT,BEFORE,BEGIN,BETWEEN,BY,CASCADE,"
         + "CASE,CAST,CHECK,COLLATE,COLUMN,COMMIT,CONFLICT,CONSTRAINT,CREATE,CROSS,CURRENT_DATE"
         + ",CURRENT_TIME,CURRENT_TIMESTAMP,DATABASE,DEFAULT,DEFERRABLE,DEFERRED,DELETE,DESC"
@@ -52,15 +52,18 @@ public class SCSqliteHelper extends SQLiteOpenHelper {
         + ",NO,NOT,NOTNULL,NULL,OF,OFFSET,ON,OR,ORDER,OUTER,PLAN,PRAGMA,PRIMARY,QUERY,RAISE"
         + ",RECURSIVE,REFERENCES,REGEXP,REINDEX,RELEASE,RENAME,REPLACE,RESTRICT,RIGHT,ROLLBACK,"
         + "ROW,SAVEPOINT,SELECT,SET,TABLE,TEMP,TEMPORARY,THEN,TO,TRANSACTION,TRIGGER,UNION,"
-        + "UNIQUE,UPDATE,USING,VACUUM,VALUES,VIEW,VIRTUAL,WHEN,WHERE,WITH,WITHOUT")
+        + "UNIQUE,UPDATE,USING,VACUUM,VALUES,VIEW,VIRTUAL,WHEN,WHERE,WITH,WITHOUT"
         .split(","));
+
     private static final int DATABASE_VERSION = 1;
+
     private SqlBrite sqlBrite = SqlBrite.create(new SqlBrite.Logger() {
         @Override
         public void log(String message) {
             Log.d("SQLBRITE", message);
         }
     });
+
     private BriteDatabase db = sqlBrite.wrapDatabaseHelper(this, Schedulers.io());
 
     static {
@@ -159,5 +162,9 @@ public class SCSqliteHelper extends SQLiteOpenHelper {
 
     public static byte[] getBlob(Cursor cursor, String columnName) {
         return cursor.getBlob(cursor.getColumnIndexOrThrow(columnName));
+    }
+
+    public String getSanitizedColumnName(String columnName) {
+        return SQLITE_KEYWORDS.contains(columnName.toUpperCase()) ? columnName + "_" : columnName;
     }
 }

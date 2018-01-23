@@ -156,35 +156,44 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
         }
     }
 
+    /**
+     * Registers an instance of {@link SCDataStore} with SCDataService.  Returns true if the
+     * {@link SCDataStore} instance has not been registered already and the {@link SCStoreConfig} is
+     * valid, otherwise returns false.
+     *
+     * @param scStoreConfig
+     * @return
+     */
     public boolean registerStoreByConfig(SCStoreConfig scStoreConfig) {
+        // todo: validate that config is valid (has unique id, etc)
+        if (stores.containsKey(scStoreConfig.getUniqueID())) {
+            Log.d(LOG_TAG, String.format("Store with id %s already registered with SCDataService",
+                scStoreConfig.getUniqueID()));
+            return false;
+        }
         String key = scStoreConfig.getType() + "." + scStoreConfig.getVersion();
         Class store = getSupportedStoreByKey(key);
         if (store != null) {
             ArrayNode styleArray = scStoreConfig.getStyle();
-            SCStyle storeStyle = (styleArray != null && styleArray.size() > 0) ?
-                    new SCStyle(styleArray) : new SCStyle();
-
+            SCStyle storeStyle = (styleArray != null && styleArray.size() > 0) ? new SCStyle(styleArray) : new SCStyle();
             if (key.startsWith(GeoJsonStore.TYPE)) {
                 Log.d(LOG_TAG, "Registering geojson store " + scStoreConfig.getName() + " with SCDataService.");
                 registerStore(new GeoJsonStore(context, scStoreConfig, storeStyle));
+                return true;
             }
             else if (key.startsWith(GeoPackageStore.TYPE)) {
                 Log.d(LOG_TAG, "Registering gpkg store " + scStoreConfig.getName() + " with SCDataService.");
                 registerStore(new GeoPackageStore(context, scStoreConfig, storeStyle));
+                return true;
             }
             else if (key.startsWith(WFSStore.TYPE)) {
                 Log.d(LOG_TAG, "Registering wfs store " + scStoreConfig.getName() + " with SCDataService.");
                 registerStore(new WFSStore(context, scStoreConfig, storeStyle));
+                return true;
             }
-
-            Log.d(LOG_TAG,"returning true from register store by config");
-            return true;
         }
-        else {
-            Log.w(LOG_TAG, "Cannot register new store b/c it's unsupported. The unsupported store key was " + key);
-            return false;
-        }
-
+        Log.w(LOG_TAG, "Cannot register new store b/c it's unsupported. The unsupported store key was " + key);
+        return false;
     }
 
     public void unregisterStore(SCDataStore store) {
@@ -582,9 +591,9 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
     }
 
     private void addDefaultStoreImpls() {
-        supportedStoreImpls.put(GeoJsonStore.getVersionKey() ,GeoJsonStore.class);
-        supportedStoreImpls.put(GeoPackageStore.getVersionKey() ,GeoPackageStore.class);
-        supportedStoreImpls.put(WFSStore.getVersionKey() ,WFSStore.class);
+        supportedStoreImpls.put(GeoJsonStore.getVersionKey(), GeoJsonStore.class);
+        supportedStoreImpls.put(GeoPackageStore.getVersionKey(), GeoPackageStore.class);
+        supportedStoreImpls.put(WFSStore.getVersionKey(), WFSStore.class);
     }
 
     public static String serviceId() {

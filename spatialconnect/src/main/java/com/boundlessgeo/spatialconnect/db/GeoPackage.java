@@ -107,7 +107,7 @@ public class GeoPackage {
     }
 
     private boolean initializeSpatialMetadata() {
-        Log.d(LOG_TAG, "Initializing GeoPackage schema.");
+        Log.v(LOG_TAG, "Initializing GeoPackage schema.");
         Cursor cursor = null;
         try {
             cursor = db.query("SELECT InitSpatialMetadata()");
@@ -126,7 +126,7 @@ public class GeoPackage {
     }
 
     private boolean validateGeoPackageSchema() {
-        Log.d(LOG_TAG, "Validating GeoPackage schema against the spec.");
+        Log.v(LOG_TAG, "Validating GeoPackage schema against the spec.");
         Cursor cursor = null;
         try {
             cursor = db.query("SELECT CheckSpatialMetadata()");

@@ -8,6 +8,7 @@ import android.util.Log;
 import com.boundlessgeo.schema.Actions;
 import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.config.SCFormConfig;
+import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
 import com.boundlessgeo.spatialconnect.geometries.SCBoundingBox;
 import com.boundlessgeo.spatialconnect.geometries.SCGeometryFactory;
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
@@ -17,12 +18,14 @@ import com.boundlessgeo.spatialconnect.query.SCPredicate;
 import com.boundlessgeo.spatialconnect.query.SCQueryFilter;
 import com.boundlessgeo.spatialconnect.scutilities.Json.JsonUtilities;
 import com.boundlessgeo.spatialconnect.scutilities.Json.SCObjectMapper;
+import com.boundlessgeo.spatialconnect.services.SCDataService;
 import com.boundlessgeo.spatialconnect.services.SCSensorService;
 import com.boundlessgeo.spatialconnect.services.SCServiceStatusEvent;
 import com.boundlessgeo.spatialconnect.services.authService.SCAuthService;
 import com.boundlessgeo.spatialconnect.services.backendService.SCBackendService;
 import com.boundlessgeo.spatialconnect.stores.ISCSpatialStore;
 import com.boundlessgeo.spatialconnect.stores.SCDataStore;
+import com.boundlessgeo.spatialconnect.stores.SCDataStoreLifeCycle;
 import com.boundlessgeo.spatialconnect.stores.SCKeyTuple;
 import com.boundlessgeo.spatialconnect.stores.SCRasterStore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -135,6 +138,11 @@ public class SCJavascriptBridgeAPI {
             handleBackendServiceHTTPUri(subscriber);
         } else if (command == Actions.BACKENDSERVICE_CONNECTED) {
             handleConnectionStatus(subscriber);
+        } else if (command == Actions.CONFIG_ADD_STORE) {
+            handleConfigAddStore(
+                JsonUtilities.getHashMap(jsonMessage, "payload"), subscriber);
+        } else {
+            Log.w(TAG, String.format("No handler function exists for command %s", command));
         }
     }
 
@@ -169,6 +177,24 @@ public class SCJavascriptBridgeAPI {
                         }
                     }
                 });
+    }
+
+    /**
+     * Handles all the {@link Actions#CONFIG_ADD_STORE} commands.
+     */
+    private void handleConfigAddStore(HashMap<String, Object> payload, Subscriber<Object> subscriber) {
+      SCStoreConfig storeConfig = new SCStoreConfig();
+      storeConfig.setName((String) payload.get("name"));
+      storeConfig.setUri((String) payload.get("uri"));
+      storeConfig.setType((String) payload.get("store_type"));
+      storeConfig.setVersion((String) payload.get("version"));
+      storeConfig.setUniqueID((String) payload.get("id"));
+      SCDataService dataService = SpatialConnect.getInstance().getDataService();
+      boolean registered = dataService.registerStoreByConfig(storeConfig);
+      if (registered) {
+          ((SCDataStoreLifeCycle)dataService.getStoreByIdentifier(storeConfig.getUniqueID()))
+              .start().subscribe(subscriber);
+      }
     }
 
     /**

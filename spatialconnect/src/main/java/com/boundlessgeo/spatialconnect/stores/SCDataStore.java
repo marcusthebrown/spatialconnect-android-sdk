@@ -191,7 +191,8 @@ public abstract class SCDataStore {
             @Override
             public void call(final Subscriber subscriber) {
                 try {
-                    final OutputStream output = new FileOutputStream(file, true);
+                    Log.d(LOG_TAG, String.format("Downloading %s", url));
+                    final OutputStream output = new FileOutputStream(file);
                     HttpHandler.getInstance().getWithProgress(url)
                             .subscribe(
                                 new Action1<SCTuple<Float, byte[], Integer>>() {
@@ -205,12 +206,15 @@ public abstract class SCDataStore {
                                                 if (downloadTuple.third() > 0){
                                                     output.write(downloadTuple.second(), 0, downloadTuple.third());
                                                 }
-                                                subscriber.onNext(1f);
-                                                subscriber.onCompleted();
                                                 output.flush();
                                                 output.close();
+                                                Log.d(LOG_TAG, "Download completed. "
+                                                    + "File is here " + file.getAbsolutePath());
+                                                subscriber.onNext(1f);
+                                                subscriber.onCompleted();
                                             }
                                         } catch (IOException e) {
+                                            Log.e(LOG_TAG,"Unable to download from: " + url, e);
                                             subscriber.onError(e);
                                         }
                                     }
@@ -218,13 +222,13 @@ public abstract class SCDataStore {
                                 new Action1<Throwable>() {
                                     @Override
                                     public void call(Throwable t) {
-                                        String errorMsg = (t != null) ? t.getMessage() : "no message available";
-                                        Log.e(LOG_TAG,"Unable to download from: " + url + " with error: " + errorMsg);
+                                        Log.e(LOG_TAG,"Unable to download from: " + url, t);
                                         subscriber.onError(t);
                                     }
                                 }
                             );
                 } catch (Exception e) {
+                    Log.e(LOG_TAG,"Unable to download from: " + url, e);
                     subscriber.onError(e);
                 }
             }

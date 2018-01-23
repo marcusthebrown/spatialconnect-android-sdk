@@ -359,6 +359,10 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
 
     @Override
     public Observable<SCStoreStatusEvent> start() {
+        if (this.getStatus().compareTo(SCDataStoreStatus.SC_DATA_STORE_STARTED) == 0) {
+            Log.d(LOG_TAG, String.format("GeoPackageStore %s already started", this.getName()));
+            return Observable.empty();
+        }
         final String storeId = this.getStoreId();
         final GeoPackageStore storeInstance = this;
 
@@ -390,6 +394,12 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                 if (scStoreConfig.getUri().startsWith("http")) {
                     try {
                         theUrl = new URL(scStoreConfig.getUri());
+                        File dbDirectory = getContext()
+                            .getDatabasePath(scStoreConfig.getUniqueID()).getParentFile();
+                        if (!dbDirectory.exists()) {
+                            // force initialization if database directory doesn't exist
+                            dbDirectory.mkdir();
+                        }
                         download(theUrl.toString(), getContext().getDatabasePath(scStoreConfig.getUniqueID()))
                                 .sample(2, TimeUnit.SECONDS)
                                 .subscribe(

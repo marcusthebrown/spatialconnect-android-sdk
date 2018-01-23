@@ -229,7 +229,6 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
         if (formConfigs != null) {
             Log.d(LOG_TAG, "Loading "+ formConfigs.size() +" form configs");
             for (SCFormConfig formConfig : formConfigs) {
-                Log.d(LOG_TAG, "Creating table for form " + formConfig.getFormKey());
                 FormStore store = sc.getDataService().getFormStore();
                 if (store != null) {
                     store.registerFormByConfig(formConfig);
@@ -243,7 +242,6 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
         if (storeConfigs != null) {
             Log.d(LOG_TAG, "Loading "+ storeConfigs.size() +" store configs");
             for (SCStoreConfig storeConfig : storeConfigs) {
-                Log.d(LOG_TAG, "Adding store " + storeConfig.getName() + " to data service.");
                 try {
                     dataService.registerAndStartStoreByConfig(storeConfig);
                 } catch (Exception ex) {
