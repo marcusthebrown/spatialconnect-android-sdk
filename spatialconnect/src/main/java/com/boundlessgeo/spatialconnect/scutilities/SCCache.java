@@ -17,6 +17,7 @@ package com.boundlessgeo.spatialconnect.scutilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import java.util.Map;
 
 public class SCCache {
     private String LOG_TAG = SCCache.class.getSimpleName();
@@ -49,6 +50,15 @@ public class SCCache {
 
     public int getIntValue(String key) {
         return mPrefs.getInt(key, 0);
+    }
+
+    public Map<String, ?> getAllItems() {
+        return mPrefs.getAll();
+    }
+
+    public void clearCache() {
+        mEditor.clear();
+        mEditor.commit();
     }
 }
 

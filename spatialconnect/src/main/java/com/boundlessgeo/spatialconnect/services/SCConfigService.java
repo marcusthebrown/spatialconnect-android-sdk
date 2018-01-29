@@ -16,6 +16,7 @@
 package com.boundlessgeo.spatialconnect.services;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -29,14 +30,17 @@ import com.boundlessgeo.spatialconnect.scutilities.Storage.SCFileUtilities;
 import com.boundlessgeo.spatialconnect.services.authService.SCExchangeAuthMethod;
 import com.boundlessgeo.spatialconnect.services.authService.NoAuth;
 import com.boundlessgeo.spatialconnect.services.authService.SCServerAuthMethod;
+import com.boundlessgeo.spatialconnect.services.backendService.SCBackendService;
 import com.boundlessgeo.spatialconnect.services.backendService.SCExchangeBackend;
 import com.boundlessgeo.spatialconnect.services.backendService.SCSpaconBackend;
 import com.boundlessgeo.spatialconnect.stores.FormStore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +61,7 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
     private List<String> configPaths = new ArrayList<>();
     private SpatialConnect sc;
     private SCDataService dataService;
+    private ObjectMapper MAPPER = SCObjectMapper.getMapper();
 
     public SCConfigService(Context context) {
         this.context = context;
@@ -96,11 +101,26 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
             File config = new File(path);
             final SCConfig scConfig;
             try {
-                scConfig = SCObjectMapper.getMapper().readValue(config, SCConfig.class);
+                scConfig = MAPPER.readValue(config, SCConfig.class);
                 loadConfig(scConfig);
             }
             catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+        Log.d(LOG_TAG, "loading cached configs");
+        Map<String, String> cachedItems = (Map<String, String>) sc.getCache().getAllItems();
+        Iterator<String> keys = cachedItems.keySet().iterator();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            if (key.contains("sc.config.store")) {
+                try {
+                    String storeJson = sc.getCache().getStringValue(key);
+                    Log.d(LOG_TAG, "loading store " + storeJson);
+                    loadDataStore(MAPPER.readValue(storeJson,SCStoreConfig.class));
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Could not parse store config", e);
+                }
             }
         }
     }
@@ -112,7 +132,7 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
      */
     public void loadConfig(SCConfig config) {
         try {
-            Log.v(LOG_TAG, String.format("loading config %s", SCObjectMapper.getMapper().writeValueAsString(config)));
+            Log.v(LOG_TAG, String.format("loading config %s", MAPPER.writeValueAsString(config)));
         }
         catch (JsonProcessingException e) {
             // swallow it
@@ -175,7 +195,7 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
     public void setCachedConfig(SCConfig config) {
 
         try {
-            String configJson = SCObjectMapper.getMapper().writeValueAsString(config);
+            String configJson = MAPPER.writeValueAsString(config);
             sc.getCache().setValue(configJson, "spatialconnect.config.remote.cached");
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -184,8 +204,8 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
     }
 
     /**
-     * Retrieves the last cached config. This is used when the Backend Service is not
-     able to fetch a config from the SpatialConnect server
+     * Retrieves the last cached config. This is used when {@link SCBackendService} is not
+     * able to fetch a config from the SpatialConnect server.
      * @return {@link SCConfig}
      */
     public SCConfig getCachedConfig() {
@@ -193,7 +213,7 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
         try {
             String configJson = sc.getCache().getStringValue("spatialconnect.config.remote.cached");
             if (configJson != null) {
-                returnConfig = SCObjectMapper.getMapper().readValue(
+                returnConfig = MAPPER.readValue(
                         configJson,
                         SCConfig.class);
             }
@@ -224,7 +244,6 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
         return asList(SCDataService.serviceId());
     }
 
-    /* Registers all the forms specified in each config file */
     private void loadForms(List<SCFormConfig> formConfigs) {
         if (formConfigs != null) {
             Log.d(LOG_TAG, "Loading "+ formConfigs.size() +" form configs");
@@ -237,17 +256,20 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
         }
     }
 
-    /* Registers all the stores specified in each config file */
     private void loadDataStores(List<SCStoreConfig> storeConfigs) {
         if (storeConfigs != null) {
-            Log.d(LOG_TAG, "Loading "+ storeConfigs.size() +" store configs");
+            Log.d(LOG_TAG, "Loading " + storeConfigs.size() +" store configs");
             for (SCStoreConfig storeConfig : storeConfigs) {
-                try {
-                    dataService.registerAndStartStoreByConfig(storeConfig);
-                } catch (Exception ex) {
-                    Log.w(LOG_TAG, "Exception adding store to data service ", ex);
-                }
+                loadDataStore(storeConfig);
             }
+        }
+    }
+    
+    private void loadDataStore(SCStoreConfig storeConfig) {
+        try {
+            dataService.registerAndStartStoreByConfig(storeConfig);
+        } catch (Exception ex) {
+            Log.w(LOG_TAG, "Could not load data store " + storeConfig.getName(), ex);
         }
     }
 

@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.util.Log;
 
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
+import com.boundlessgeo.spatialconnect.scutilities.Storage.SCFileUtilities;
 import com.boundlessgeo.spatialconnect.tiles.SCGpkgTileSource;
 import com.boundlessgeo.spatialconnect.tiles.SCTileMatrixRow;
 import com.squareup.sqlbrite.BriteDatabase;
@@ -99,6 +100,10 @@ public class GeoPackage {
                 initializeAuditTables();
                 isValid = true;
             }
+            Log.d(LOG_TAG, String.format("GeoPackage '%s' has %d feature tables and %d tile tables",
+                name, getFeatureSourceNames().size(), getTileSources().size()));
+            Log.v(LOG_TAG, String.format("The size of %s db file is %d bytes.", name,
+                context.getDatabasePath(name).length()));
         }
         catch (Exception ex) {
             Log.w(LOG_TAG, "Could not initialize GeoPackage b/c of " + ex.toString());
@@ -249,7 +254,7 @@ public class GeoPackage {
                 }
             }
         } catch (Exception e) {
-            Log.e(LOG_TAG, "something when wrong trying to setup audit tables:" + e.getMessage());
+            Log.e(LOG_TAG, "something went wrong trying to setup audit tables", e);
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -597,6 +602,7 @@ public class GeoPackage {
      * @return {@link QueryObservable}
      */
     public QueryObservable createQuery(String table, String sql, String...args) {
+        Log.v(LOG_TAG, "creating query " + sql);
         return db.createQuery(table, sql, args);
     }
 

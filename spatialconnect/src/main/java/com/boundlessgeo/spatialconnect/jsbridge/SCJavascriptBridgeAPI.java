@@ -1,3 +1,17 @@
+/**
+ * Copyright 2016-present Boundless, http://boundlessgeo.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and limitations under the License
+ */
 package com.boundlessgeo.spatialconnect.jsbridge;
 
 import android.content.Context;
@@ -18,6 +32,7 @@ import com.boundlessgeo.spatialconnect.query.SCPredicate;
 import com.boundlessgeo.spatialconnect.query.SCQueryFilter;
 import com.boundlessgeo.spatialconnect.scutilities.Json.JsonUtilities;
 import com.boundlessgeo.spatialconnect.scutilities.Json.SCObjectMapper;
+import com.boundlessgeo.spatialconnect.scutilities.Storage.SCFileUtilities;
 import com.boundlessgeo.spatialconnect.services.SCDataService;
 import com.boundlessgeo.spatialconnect.services.SCSensorService;
 import com.boundlessgeo.spatialconnect.services.SCServiceStatusEvent;
@@ -82,9 +97,11 @@ public class SCJavascriptBridgeAPI {
 
     /**
      * Handles a message sent from Javascript.  Expects the message envelope to look like:
-     * <code>{"type":<String>,"payload":<JSON Object>}</code>
+     * <code>{"type":<String>,"payload":<JSON Object>}</code>.  If required, a response is sent
+     * back to the React Native module using the subscriber
      *
      * @param jsonMessage message received from Javascript
+     * @param subscriber subscriber passed down from RNSpatialConnect
      */
     public void parseJSAction(HashMap<String, Object> jsonMessage, Subscriber<Object> subscriber) {
         if (jsonMessage == null) {
@@ -97,6 +114,18 @@ public class SCJavascriptBridgeAPI {
         if (TextUtils.isEmpty(type)) {
             return;
         }
+
+        // should we have to update the Actions in the schema repo?  or should we be able to handle
+        // mobile specific messages like this one.
+        if (type.equals("CLEAR_SC_CACHE")) {
+            mSpatialConnect.getCache().clearCache();
+            return;
+        }
+        if (type.equals("DELETE_DATABASES")) {
+            mSpatialConnect.getDataService().deleteDatabases();
+            return;
+        }
+
         Actions command = Actions.fromAction(type);
 
         Log.d(TAG, "sdk handling: " + command + " :: " + jsonMessage);
@@ -141,9 +170,23 @@ public class SCJavascriptBridgeAPI {
         } else if (command == Actions.CONFIG_ADD_STORE) {
             handleConfigAddStore(
                 JsonUtilities.getHashMap(jsonMessage, "payload"), subscriber);
-        } else {
+        } else if (command == Actions.API_FETCH_LAYERS) {
+            handleFetchLayers(subscriber);
+        }
+        else {
             Log.w(TAG, String.format("No handler function exists for command %s", command));
         }
+    }
+
+    private void handleFetchLayers(Subscriber subscriber) {
+        HashMap<String, Object> payload = new HashMap<>();
+        ArrayList<HashMap<String, Object>> layers = new ArrayList<>();
+        HashMap<String, Object> layer1 = new HashMap<>();
+        layer1.put("name", "test");
+        layers.add(layer1);
+        payload.put("layers", layers);
+        subscriber.onNext(payload);
+        subscriber.onCompleted();
     }
 
     /**
@@ -170,7 +213,6 @@ public class SCJavascriptBridgeAPI {
                             for (SCDataStore store : stores) {
                                 storesArray.add(getStoreMap(store));
                             }
-
                             payload.put("stores", storesArray);
 
                             mSubscriber.onNext(payload);
@@ -189,11 +231,19 @@ public class SCJavascriptBridgeAPI {
       storeConfig.setType((String) payload.get("store_type"));
       storeConfig.setVersion((String) payload.get("version"));
       storeConfig.setUniqueID((String) payload.get("id"));
-      SCDataService dataService = SpatialConnect.getInstance().getDataService();
+      SCDataService dataService = mSpatialConnect.getDataService();
       boolean registered = dataService.registerStoreByConfig(storeConfig);
       if (registered) {
           ((SCDataStoreLifeCycle)dataService.getStoreByIdentifier(storeConfig.getUniqueID()))
               .start().subscribe(subscriber);
+          // save the config in the apps preferences
+          try {
+              String configJson = SCObjectMapper.getMapper().writeValueAsString(storeConfig);
+              mSpatialConnect.getCache()
+                  .setValue(configJson, "sc.config.store." + storeConfig.getName());
+          } catch (JsonProcessingException e) {
+              Log.e(TAG, "Could not serialize config to string", e);
+          }
       }
     }
 

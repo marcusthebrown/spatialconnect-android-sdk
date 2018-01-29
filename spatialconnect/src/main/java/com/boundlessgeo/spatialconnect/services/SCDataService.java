@@ -477,6 +477,13 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
         }
     }
 
+    public void deleteDatabases() {
+        String[] dbList = this.context.databaseList();
+        for (int i = 0; i < dbList.length; i++) {
+            this.context.getDatabasePath(dbList[i]).delete();
+        }
+    }
+
     private void startStore(final SCDataStore store) {
         if (!store.getStatus().equals(SCDataStoreStatus.SC_DATA_STORE_RUNNING)) {
             ((SCDataStoreLifeCycle) store).start()

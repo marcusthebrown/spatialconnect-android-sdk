@@ -178,23 +178,24 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                     })
                     .flatMap(new Func1<String, Observable<SCSpatialFeature>>() {
                         @Override
-                        public Observable<SCSpatialFeature> call(final String layerName) {
-                            final SCGpkgFeatureSource featureSource = gpkg.getFeatureSourceByName(layerName);
-                            return gpkg.createQuery(
-                                    layerName,
-                                    String.format(
-                                            "SELECT %s FROM %s WHERE %s IN (%s) LIMIT %d",
-                                            getSelectColumnsString(featureSource),
-                                            layerName,
-                                            featureSource.getPrimaryKeyName(),
-                                            createRtreeSubQuery(featureSource, queryFilter.getPredicate().getBoundingBox()),
-                                            queryLimit
-                                    )
-                            ).flatMap(getFeatureMapper(featureSource)).onBackpressureBuffer(queryFilter.getLimit());
+                        public Observable<SCSpatialFeature> call(final String featureTableName) {
+                            final SCGpkgFeatureSource featureSource = gpkg.getFeatureSourceByName(featureTableName);
+                            String sql = String.format(
+                                "SELECT %s FROM %s WHERE %s IN (%s) LIMIT %d",
+                                getSelectColumnsString(featureSource),
+                                featureTableName,
+                                featureSource.getPrimaryKeyName(),
+                                createRtreeSubQuery(featureSource, queryFilter.getPredicate().getBoundingBox()),
+                                queryLimit
+                            );
+                            return gpkg.createQuery(featureTableName, sql)
+                                .flatMap(getFeatureMapper(featureSource))
+                                .onBackpressureBuffer(queryFilter.getLimit());
                         }
                     });
         }
         else {
+            Log.w(LOG_TAG, "no feature sources to query for gpkg " + this.getName());
             // can't query on geopackages with no features
             return Observable.empty();
         }
@@ -359,7 +360,8 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
 
     @Override
     public Observable<SCStoreStatusEvent> start() {
-        if (this.getStatus().compareTo(SCDataStoreStatus.SC_DATA_STORE_STARTED) == 0) {
+        if (this.getStatus().compareTo(SCDataStoreStatus.SC_DATA_STORE_STARTED) == 0 ||
+            this.getStatus().compareTo(SCDataStoreStatus.SC_DATA_STORE_RUNNING) == 0) {
             Log.d(LOG_TAG, String.format("GeoPackageStore %s already started", this.getName()));
             return Observable.empty();
         }
@@ -381,6 +383,7 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                 // create new GeoPackage for the file that's already on disk
                 gpkg = new GeoPackage(getContext(), scStoreConfig.getUniqueID());
                 if (gpkg.isValid()) {
+                    storeInstance.setStatus(SCDataStoreStatus.SC_DATA_STORE_RUNNING);
                     subscriber.onCompleted();
                 }
                 else {
@@ -401,7 +404,7 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                             dbDirectory.mkdir();
                         }
                         download(theUrl.toString(), getContext().getDatabasePath(scStoreConfig.getUniqueID()))
-                                .sample(2, TimeUnit.SECONDS)
+                                .sample(1, TimeUnit.SECONDS)
                                 .subscribe(
                                         new Action1<Float>() {
                                             @Override
@@ -565,6 +568,7 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                 return query.asRows(new Func1<Cursor, SCSpatialFeature>() {
                     @Override
                     public SCSpatialFeature call(final Cursor cursor) {
+                        String rowId = SCSqliteHelper.getString(cursor, source.getPrimaryKeyName());
                         SCSpatialFeature feature = new SCSpatialFeature();
                         // deserialize byte[] to Geometry object
                         byte[] wkb = SCSqliteHelper.getBlob(cursor, source.getGeomColumnName());
@@ -576,11 +580,14 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                             }
                         }
                         catch (ParseException e) {
-                            Log.w(LOG_TAG, "Could not parse geometry");
+                            Log.w(LOG_TAG, String.format(
+                                "Could not parse geometry for feature %s.%s",
+                                source.getTableName(), rowId), e);
+                            Log.v(LOG_TAG, "Invalid geometry was: " + SCSqliteHelper.getString(cursor, source.getGeomColumnName()));
                         }
                         feature.setStoreId(scStoreConfig.getUniqueID());
                         feature.setLayerId(source.getTableName());
-                        feature.setId(SCSqliteHelper.getString(cursor, source.getPrimaryKeyName()));
+                        feature.setId(rowId);
                         for (Map.Entry<String, String> column : source.getColumns().entrySet()) {
                             if (column.getValue().equalsIgnoreCase("BLOB")
                                     || column.getValue().equalsIgnoreCase("GEOMETRY")
@@ -608,6 +615,14 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                                 feature.getProperties().put(
                                         column.getKey(),
                                         SCSqliteHelper.getString(cursor, column.getKey())
+                                );
+                            }
+                            else if (column.getValue().startsWith("DATE") ||
+                                column.getValue().startsWith("TIMESTAMP")) {
+                                // assume dates and times are stored as strings
+                                feature.getProperties().put(
+                                    column.getKey(),
+                                    SCSqliteHelper.getString(cursor, column.getKey())
                                 );
                             }
                             else {
