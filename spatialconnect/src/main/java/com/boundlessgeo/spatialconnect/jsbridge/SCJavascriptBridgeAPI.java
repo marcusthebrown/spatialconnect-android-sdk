@@ -115,14 +115,15 @@ public class SCJavascriptBridgeAPI {
             return;
         }
 
-        // should we have to update the Actions in the schema repo?  or should we be able to handle
-        // mobile specific messages like this one.
-        if (type.equals("CLEAR_SC_CACHE")) {
-            mSpatialConnect.getCache().clearCache();
+        // first check SCActions
+        if (type.equals(SCActions.DELETE_ALL_SC_DATASTORES.value())) {
+            mSpatialConnect.getDataService().deleteDatabases();
             return;
         }
-        if (type.equals("DELETE_DATABASES")) {
-            mSpatialConnect.getDataService().deleteDatabases();
+        if (type.equals(SCActions.DELETE_SC_DATASTORE.value())) {
+            HashMap payload = JsonUtilities.getHashMap(jsonMessage, "payload");
+            String storeId = (String) payload.get("storeId");
+            deleteSCDataStore(storeId);
             return;
         }
 
@@ -176,6 +177,14 @@ public class SCJavascriptBridgeAPI {
         else {
             Log.w(TAG, String.format("No handler function exists for command %s", command));
         }
+    }
+
+    private void deleteSCDataStore(String storeId) {
+        SCDataStore store = mSpatialConnect.getDataService().getStoreByIdentifier(storeId);
+        if (store != null) {
+            mSpatialConnect.getDataService().destroyStore(store);
+        }
+        mSpatialConnect.getCache().removeValue("sc.config.store." + storeId);
     }
 
     private void handleFetchLayers(Subscriber subscriber) {
@@ -240,7 +249,7 @@ public class SCJavascriptBridgeAPI {
           try {
               String configJson = SCObjectMapper.getMapper().writeValueAsString(storeConfig);
               mSpatialConnect.getCache()
-                  .setValue(configJson, "sc.config.store." + storeConfig.getName());
+                  .setValue(configJson, "sc.config.store." + storeConfig.getUniqueID());
           } catch (JsonProcessingException e) {
               Log.e(TAG, "Could not serialize config to string", e);
           }

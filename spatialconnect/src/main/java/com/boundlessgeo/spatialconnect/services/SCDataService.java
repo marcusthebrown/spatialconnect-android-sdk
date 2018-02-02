@@ -17,9 +17,11 @@ package com.boundlessgeo.spatialconnect.services;
 import android.content.Context;
 import android.util.Log;
 
+import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
 import com.boundlessgeo.spatialconnect.query.SCQueryFilter;
+import com.boundlessgeo.spatialconnect.scutilities.SCCache;
 import com.boundlessgeo.spatialconnect.stores.FormStore;
 import com.boundlessgeo.spatialconnect.stores.GeoJsonStore;
 import com.boundlessgeo.spatialconnect.stores.GeoPackageStore;
@@ -478,9 +480,11 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
     }
 
     public void deleteDatabases() {
+        SCCache scCache = SpatialConnect.getInstance().getCache();
         String[] dbList = this.context.databaseList();
         for (int i = 0; i < dbList.length; i++) {
             this.context.getDatabasePath(dbList[i]).delete();
+            scCache.removeValue("sc.config.store." + dbList[i]);
         }
     }
 
@@ -533,7 +537,7 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
         }
     }
 
-    private void destroyStore(final SCDataStore store) {
+    public void destroyStore(final SCDataStore store) {
         if (store.getStatus().equals(SCDataStoreStatus.SC_DATA_STORE_RUNNING)) {
             ((SCDataStoreLifeCycle) store).destroy();
             hasStores.onNext(stores.size() > 0);

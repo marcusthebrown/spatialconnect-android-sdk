@@ -60,5 +60,10 @@ public class SCCache {
         mEditor.clear();
         mEditor.commit();
     }
+
+    public void removeValue(String key) {
+        mEditor.remove(key);
+        mEditor.commit();
+    }
 }
 
