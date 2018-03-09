@@ -641,4 +641,7 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
         return String.format("%s.%s",TYPE, VERSION);
     }
 
+    public SCStoreConfig getStoreConfig() {
+        return scStoreConfig;
+    }
 }
