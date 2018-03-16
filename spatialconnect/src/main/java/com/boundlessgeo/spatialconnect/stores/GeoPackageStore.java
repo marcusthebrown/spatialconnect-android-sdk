@@ -16,6 +16,7 @@ package com.boundlessgeo.spatialconnect.stores;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Base64;
 import android.util.Log;
 
 import com.boundlessgeo.spatialconnect.config.SCStoreConfig;
@@ -40,6 +41,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
+import java.util.Arrays;
 import org.sqlite.database.SQLException;
 
 import java.io.File;
@@ -72,6 +74,7 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
     protected GeoPackage gpkg;
     protected SCStoreConfig scStoreConfig;
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
+    protected static final String NO_IMAGE = "R0lGODdhyACWAOMAAMzMzJaWlsXFxb6+vqOjo5ycnLe3t6qqqrGxsQAAAAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAyACWAAAE/hDISau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru987//AoHBILBqPyKRyyWw6n9CodEqtWq/YrHbL7Xq/4LB4TC6bz+i0es1uu9/wuHxOr9vv+Lx+z+/7/4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3TAMFBQO4LAUBAQW+K8DCxCoGu73IzSUCwQECAwQBBAIVCMAFCBrRxwDQwQLKvOHV1xbUwQfYEwIHwO3BBBTawu2BA9HGwcMT1b7Vw/Dt3z563xAIrHCQnzsAAf0F6ybhwDdwgAx8OxDQgASN/sKUBWNmwQDIfwBAThRoMYDHCRYJGAhI8eRMf+4OFrgZgCKgaB4PHqg4EoBQbxgBROtlrJu4ofYm0JMQkJk/mOMkTA10Vas1CcakJrXQ1eu/sF4HWhB3NphYlNsmxOWKsWtZtASTdsVb1mhEu3UDX3RLFyVguITzolQKji/GhgXNvhU7OICgsoflJr7Qd2/isgEPGGAruTTjnSZTXw7c1rJpznobf2Y9GYBjxIsJYQbXstfRDJ1luz6t2TDvosSJSpMw4GXG3TtT+hPpEoPJ6R89B7AaUrnolgWwnUQQEKVOAy199mlonPDfr3m/GeUHFjBhAf0SUh28+P12QOIIgDbcPdwgJV+Arf0jnwTwsHOQT/Hs1BcABObjDAcTXhiCOGppKAJI6nnIwQGiKZSViB2YqB+KHtxjjXMsxijjjDTWaOONOOao44489ujjj0AGKeSQRBZp5JFIJqnkkkw26eSTUEYp5ZRUVmnllVhmqeWWXHbp5ZdghinmmGSW6UsEADs=";
 
     /**
      * Constructor for GeoPackageStore that initializes the data store adapter
@@ -149,7 +152,7 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
     }
 
     public String getFilePath() {
-        return getContext().getDatabasePath(scStoreConfig.getUniqueID()).getPath();
+        return getContext().getDatabasePath(scStoreConfig.getUniqueId()).getPath();
     }
 
     @Override
@@ -378,10 +381,10 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
             public void call(final Subscriber<? super SCStoreStatusEvent> subscriber) {
 
             // The db name on disk is its store ID to guarantee uniqueness on disk
-            if (getContext().getDatabasePath(scStoreConfig.getUniqueID()).exists()) {
-                Log.d(LOG_TAG, "GeoPackage " + scStoreConfig.getUniqueID() + " already exists.  Not downloading.");
+            if (getContext().getDatabasePath(scStoreConfig.getUniqueId()).exists()) {
+                Log.d(LOG_TAG, "GeoPackage " + scStoreConfig.getUniqueId() + " already exists.  Not downloading.");
                 // create new GeoPackage for the file that's already on disk
-                gpkg = new GeoPackage(getContext(), scStoreConfig.getUniqueID());
+                gpkg = new GeoPackage(getContext(), scStoreConfig.getUniqueId());
                 if (gpkg.isValid()) {
                     storeInstance.setStatus(SCDataStoreStatus.SC_DATA_STORE_RUNNING);
                     subscriber.onCompleted();
@@ -398,12 +401,12 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                     try {
                         theUrl = new URL(scStoreConfig.getUri());
                         File dbDirectory = getContext()
-                            .getDatabasePath(scStoreConfig.getUniqueID()).getParentFile();
+                            .getDatabasePath(scStoreConfig.getUniqueId()).getParentFile();
                         if (!dbDirectory.exists()) {
                             // force initialization if database directory doesn't exist
                             dbDirectory.mkdir();
                         }
-                        download(theUrl.toString(), getContext().getDatabasePath(scStoreConfig.getUniqueID()))
+                        download(theUrl.toString(), getContext().getDatabasePath(scStoreConfig.getUniqueId()))
                                 .sample(1, TimeUnit.SECONDS)
                                 .subscribe(
                                         new Action1<Float>() {
@@ -415,7 +418,7 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                                                     subscriber.onNext(new SCStoreStatusEvent(SCDataStoreStatus.SC_DATA_STORE_DOWNLOADING_DATA));
                                                 } else {
                                                     setStatus(SCDataStoreStatus.SC_DATA_STORE_RUNNING);
-                                                    gpkg = new GeoPackage(getContext(), scStoreConfig.getUniqueID());
+                                                    gpkg = new GeoPackage(getContext(), scStoreConfig.getUniqueId());
                                                     if (gpkg.isValid()) {
                                                         subscriber.onCompleted();
                                                     }
@@ -441,7 +444,7 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                     }
                 }
                 else if (scStoreConfig.getUri().startsWith("file")) {
-                    gpkg = new GeoPackage(getContext(), scStoreConfig.getUniqueID());
+                    gpkg = new GeoPackage(getContext(), scStoreConfig.getUniqueId());
                     if (gpkg.isValid()) {
                         subscriber.onNext(new SCStoreStatusEvent(SCDataStoreStatus.SC_DATA_STORE_RUNNING));
                         subscriber.onCompleted();
@@ -548,7 +551,7 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
     }
 
     private void saveFileToFilesystem(InputStream is) throws IOException {
-        File dbFile = getContext().getDatabasePath(scStoreConfig.getUniqueID());
+        File dbFile = getContext().getDatabasePath(scStoreConfig.getUniqueId());
         FileOutputStream fos = new FileOutputStream(dbFile);
         byte[] buffer = new byte[1024];
         int len = 0;
@@ -585,7 +588,7 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                                 source.getTableName(), rowId), e);
                             Log.v(LOG_TAG, "Invalid geometry was: " + SCSqliteHelper.getString(cursor, source.getGeomColumnName()));
                         }
-                        feature.setStoreId(scStoreConfig.getUniqueID());
+                        feature.setStoreId(scStoreConfig.getUniqueId());
                         feature.setLayerId(source.getTableName());
                         feature.setId(rowId);
                         for (Map.Entry<String, String> column : source.getColumns().entrySet()) {
@@ -612,10 +615,19 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
                                 );
                             }
                             else if (column.getValue().startsWith("TEXT")) {
-                                feature.getProperties().put(
+                                // handle photos column
+                                if (column.getKey().equals("photos")) {
+                                    String photosValue = getBase64StringsForPhotos(
+                                        source.getTableName() + GeoPackage.PHOTOS_MAPPING_TABLE_SUFFIX,
+                                        SCSqliteHelper.getString(cursor, column.getKey())
+                                    );
+                                    feature.getProperties().put(column.getKey(), photosValue);
+                                } else {
+                                    feature.getProperties().put(
                                         column.getKey(),
                                         SCSqliteHelper.getString(cursor, column.getKey())
-                                );
+                                    );
+                                }
                             }
                             else if (column.getValue().startsWith("DATE") ||
                                 column.getValue().startsWith("TIMESTAMP")) {
@@ -637,8 +649,49 @@ public class GeoPackageStore extends SCDataStore implements ISCSpatialStore, SCD
         };
     }
 
+    /**
+     * Accepts a String representing a JavaScript array of Exchange fileservice urls and returns
+     * another String representing a JavaScript array of base64 encoded images fetched from the
+     * mappingTable.
+     *
+     * @param photos a string that contains a JS array of urls
+     * @returna string that contains a JS array of base64 encoded images
+     */
+    protected String getBase64StringsForPhotos(String mappingTableName, String photos) {
+        StringBuilder sb = new StringBuilder(photos.length());
+        sb.append("[");
+        List<String> photoUrls =
+            Arrays.asList(photos.replace("[", "").replace("]", "").split("\\,"));
+        List<String> base64Images = new ArrayList<>(photoUrls.size());
+        for (int i = 0; i < photoUrls.size(); i++) {
+            String photoUrl = photoUrls.get(i);
+            photoUrl = photoUrl.replace("\"", "");
+            if (photoUrl.startsWith("http") && photoUrl.contains("fileservice")) {
+                String sql =
+                    String.format("SELECT blob FROM %s WHERE url = %s", mappingTableName, photoUrl);
+                Cursor cursor = gpkg.query(sql);
+                if (cursor != null && cursor.moveToFirst()) {
+                    String imgString = Base64.encodeToString(cursor.getBlob(0), Base64.DEFAULT);
+                    base64Images.add(imgString);
+                    sb.append("\"").append(imgString).append("\"");
+                } else {
+                    base64Images.add(NO_IMAGE);
+                    sb.append("\"").append(NO_IMAGE).append("\"");
+                }
+                if (i != photoUrls.size() - 1) {
+                    sb.append(",");
+                }
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
     public static String getVersionKey() {
         return String.format("%s.%s",TYPE, VERSION);
     }
 
+    public SCStoreConfig getStoreConfig() {
+        return scStoreConfig;
+    }
 }

@@ -103,7 +103,7 @@ public class GeoJsonStore extends SCDataStore implements ISCSpatialStore, SCData
                 ).map(new Func1<SCSpatialFeature, SCSpatialFeature>() {
                     @Override
                     public SCSpatialFeature call(SCSpatialFeature scSpatialFeature) {
-                        scSpatialFeature.setStoreId(scStoreConfig.getUniqueID());
+                        scSpatialFeature.setStoreId(scStoreConfig.getUniqueId());
                         scSpatialFeature.setLayerId(DEFAULTLAYER);
                         scSpatialFeature.setId(scSpatialFeature.getId());
                         return scSpatialFeature;
@@ -180,7 +180,7 @@ public class GeoJsonStore extends SCDataStore implements ISCSpatialStore, SCData
         return Observable.create(new Observable.OnSubscribe<SCStoreStatusEvent>() {
             @Override
             public void call(final Subscriber subscriber) {
-                final String filePath = scStoreConfig.getUniqueID() + EXT;
+                final String filePath = scStoreConfig.getUniqueId() + EXT;
                 final File geoJsonFile = new File(getPath());
 
                 if (!geoJsonFile.exists()) {
@@ -214,7 +214,7 @@ public class GeoJsonStore extends SCDataStore implements ISCSpatialStore, SCData
                         } catch (IOException e) {
                             Log.w(LOG_TAG, "Couldn't download geojson store.", e);
                             GeoJsonStore parentStore =
-                                    (GeoJsonStore) SpatialConnect.getInstance().getDataService().getStoreByIdentifier(scStoreConfig.getUniqueID());
+                                    (GeoJsonStore) SpatialConnect.getInstance().getDataService().getStoreByIdentifier(scStoreConfig.getUniqueId());
                             parentStore.setStatus(SCDataStoreStatus.SC_DATA_STORE_STOPPED);
                             e.printStackTrace();
                             subscriber.onError(e);
@@ -229,7 +229,7 @@ public class GeoJsonStore extends SCDataStore implements ISCSpatialStore, SCData
                             // if the doesn't exist, then we attempt to create it by copying it from the raw
                             // resources to the destination specified in the config
                             GeoJsonStore parentStore =
-                                    (GeoJsonStore) SpatialConnect.getInstance().getDataService().getStoreByIdentifier(scStoreConfig.getUniqueID());
+                                    (GeoJsonStore) SpatialConnect.getInstance().getDataService().getStoreByIdentifier(scStoreConfig.getUniqueId());
                             try {
                                 Log.d(LOG_TAG, "Attempting to connect to " + scStoreConfig.getUri().split("\\.")[0]);
                                 int resourceId = context.getResources().getIdentifier(
@@ -266,7 +266,7 @@ public class GeoJsonStore extends SCDataStore implements ISCSpatialStore, SCData
                             Log.d(LOG_TAG, "File already exists so set the status to connected.");
                             geojsonFilePath = localUriPath;
                             GeoJsonStore parentStore =
-                                    (GeoJsonStore) SpatialConnect.getInstance().getDataService().getStoreByIdentifier(scStoreConfig.getUniqueID());
+                                    (GeoJsonStore) SpatialConnect.getInstance().getDataService().getStoreByIdentifier(scStoreConfig.getUniqueId());
                             parentStore.setStatus(SCDataStoreStatus.SC_DATA_STORE_RUNNING);
                             //adapterInstance.connected();
                             subscriber.onCompleted();
@@ -275,7 +275,7 @@ public class GeoJsonStore extends SCDataStore implements ISCSpatialStore, SCData
 
                 } else {
                     GeoJsonStore parentStore =
-                            (GeoJsonStore) SpatialConnect.getInstance().getDataService().getStoreByIdentifier(scStoreConfig.getUniqueID());
+                            (GeoJsonStore) SpatialConnect.getInstance().getDataService().getStoreByIdentifier(scStoreConfig.getUniqueId());
                     parentStore.setStatus(SCDataStoreStatus.SC_DATA_STORE_RUNNING);
                     geojsonFilePath = filePath;
                     subscriber.onCompleted();
@@ -305,7 +305,7 @@ public class GeoJsonStore extends SCDataStore implements ISCSpatialStore, SCData
         StringBuilder filePath = new StringBuilder();
         filePath.append(context.getFilesDir());
         filePath.append(File.separator);
-        filePath.append(scStoreConfig.getUniqueID());
+        filePath.append(scStoreConfig.getUniqueId());
         filePath.append(EXT);
         return filePath.toString();
     }

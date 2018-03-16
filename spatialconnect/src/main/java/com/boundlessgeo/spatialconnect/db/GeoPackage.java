@@ -1,16 +1,22 @@
 package com.boundlessgeo.spatialconnect.db;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
+import com.boundlessgeo.spatialconnect.SpatialConnect;
 import com.boundlessgeo.spatialconnect.geometries.SCSpatialFeature;
-import com.boundlessgeo.spatialconnect.scutilities.Storage.SCFileUtilities;
+import com.boundlessgeo.spatialconnect.scutilities.HttpHandler;
+import com.boundlessgeo.spatialconnect.stores.GeoPackageStore;
 import com.boundlessgeo.spatialconnect.tiles.SCGpkgTileSource;
 import com.boundlessgeo.spatialconnect.tiles.SCTileMatrixRow;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.QueryObservable;
 
+import java.io.IOException;
+import java.util.Arrays;
+import okhttp3.Response;
 import org.sqlite.database.SQLException;
 
 import java.util.ArrayList;
@@ -22,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
@@ -32,6 +39,7 @@ public class GeoPackage {
 
     public static final String SENT_AUDIT_COL = "sent";
     public static final String RECEIVED_AUDIT_COL = "received";
+    public static final String PHOTOS_MAPPING_TABLE_SUFFIX = "_photos";
 
     /**
      * The log tag for this class.
@@ -98,6 +106,7 @@ public class GeoPackage {
 
                 getTileSources();
                 initializeAuditTables();
+                downloadMedia();
                 isValid = true;
             }
             Log.d(LOG_TAG, String.format("GeoPackage '%s' has %d feature tables and %d tile tables",
@@ -170,6 +179,82 @@ public class GeoPackage {
             }
         }
     }
+
+  // we want do download and store images in SQLITE instead of on the filesystem b/c we assume
+  // that most of the binary data will be small images
+  // see: https://www.sqlite.org/intern-v-extern-blob.html
+  private void downloadMedia() {
+    for (SCGpkgFeatureSource fSource : getFeatureSources().values()) {
+      Set<String> columnNames = fSource.getColumns().keySet();
+      if (columnNames.contains("photos")) {
+        downloadPhotos(fSource, "photos");
+        downloadPhotos(fSource, "photos");
+      }
+    }
+  }
+
+  /**
+   * Downloads images from Exchange's fileservice for each url listed in the photos property and
+   * stores them in a separate table mapping the url to the blob of the image.
+   */
+  private void downloadPhotos(final SCGpkgFeatureSource fSource, final String photosColumnName) {
+    final String tableName = fSource.getTableName();
+    final String pkColumnName = fSource.getPrimaryKeyName();
+    final String mappingTableName = tableName + PHOTOS_MAPPING_TABLE_SUFFIX;
+    createMappingTable(mappingTableName);
+    final String sql =
+        String.format("SELECT %s, %s FROM %s", pkColumnName, photosColumnName, tableName);
+    final Cursor cursor = db.query(sql);
+    if (cursor != null && cursor.moveToFirst()) {
+      while (cursor.moveToNext()) {
+        // expects photos to be a string that contains a JS array of urls
+        // ex.  "["http://some.url/", "https://some.other.url"]"
+        final String photos = SCSqliteHelper.getString(cursor, photosColumnName);
+        List<String> photoUrls =
+            Arrays.asList(photos.replace("[", "").replace("]", "").split("\\,"));
+        Observable.from(photoUrls).map(new Func1<String, String>() {
+          @Override public String call(String url) {
+            return url.replace("\"", "");
+          }
+        }).filter(new Func1<String, Boolean>() {
+          @Override public Boolean call(String url) {
+            return url.startsWith("http") && url.contains("fileservice");
+          }
+        }).flatMap(new Func1<String, Observable<Response>>() {
+          @Override public Observable<Response> call(String url) {
+            // we need a way to get the access token so that we can download the
+            // image from the fileservice.  currently when we create the store by
+            // sending a CONFIG_ADD_STORE message, the store's uri property contains
+            // the access token so we're grabbing that here.  this is not an optimal solution
+            // but is good enough for now
+            String storeUri = ((GeoPackageStore) SpatialConnect.getInstance()
+                .getDataService()
+                .getStoreByIdentifier(name)).getStoreConfig().getUri();
+            String accessToken = storeUri.split("access_token=")[1];
+            return HttpHandler.getInstance().getWithBearerToken(url, accessToken);
+          }
+        }).subscribe(new Subscriber<Response>() {
+          @Override public void onCompleted() {
+          }
+
+          @Override public void onError(Throwable e) {
+            Log.w(LOG_TAG, "Could not download photo", e);
+          }
+
+          @Override public void onNext(Response response) {
+            try {
+              ContentValues values = new ContentValues();
+              values.put("url", response.request().url().toString());
+              values.put("blob", response.body().bytes());
+              db.insert(mappingTableName, values);
+            } catch (IOException e) {
+              Log.w(LOG_TAG, "Could not extract bytes from response", e);
+            }
+          }
+        });
+      }
+    }
+  }
 
     private void initializeAuditTables() {
         Cursor cursor = null;
@@ -309,6 +394,17 @@ public class GeoPackage {
         sql.append("); END;");
 
         return sql.toString();
+    }
+
+  /**
+   * Creates a mapping table to map URLs to BLOBs stored in the GeoPackage.
+   *
+   * @param mappingTableName
+   */
+  private void createMappingTable(String mappingTableName){
+      String sql = String.format(
+          "CREATE TABLE IF NOT EXISTS %s (url TEXT PRIMARY KEY, blob BLOB)", mappingTableName);
+      db.execute(sql);
     }
 
     // executes the CreateSpatialIndex function for a given table

@@ -63,8 +63,8 @@ public abstract class SCDataStore {
 
     public SCDataStore(Context context, SCStoreConfig scStoreConfig) {
         this.context = context;
-        if (scStoreConfig.getUniqueID() != null) {
-            this.storeId = scStoreConfig.getUniqueID();
+        if (scStoreConfig != null && scStoreConfig.getUniqueId() != null) {
+            this.storeId = scStoreConfig.getUniqueId();
         }
         else {
             this.storeId = UUID.randomUUID().toString();

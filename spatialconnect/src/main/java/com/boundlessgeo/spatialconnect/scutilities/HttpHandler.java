@@ -60,15 +60,13 @@ public class HttpHandler {
         return this.client;
     }
 
-    public Observable<Response> get(final String url, final String authToken) throws IOException {
+    public Observable<Response> get(final String url, final String authToken) {
         return Observable.create(new Observable.OnSubscribe<Response>() {
-            @Override
-            public void call(Subscriber<? super Response> subscriber) {
+            @Override public void call(Subscriber<? super Response> subscriber) {
                 try {
-                    Request request = new Request.Builder()
-                            .url(url)
-                            .header("Authorization", "Token " + authToken)
-                            .build();
+                    Request request = new Request.Builder().url(url)
+                        .header("Authorization", "Token " + authToken)
+                        .build();
                     Response response = client.newCall(request).execute();
                     if (!response.isSuccessful()) {
                         subscriber.onError(new Exception("error"));
@@ -80,11 +78,27 @@ public class HttpHandler {
                     subscriber.onError(e);
                 }
             }
-        })
-                .subscribeOn(Schedulers.io());
+        }).subscribeOn(Schedulers.io());
     }
 
-    public Observable<Response> get(final String url) throws IOException {
+    public Observable<Response> getWithBearerToken(final String url, final String authToken) {
+        return Observable.create(new Observable.OnSubscribe<Response>() {
+            @Override public void call(Subscriber<? super Response> subscriber) {
+                try {
+                    Request request = new Request.Builder().url(url)
+                        .header("Authorization", "Bearer " + authToken)
+                        .build();
+                    Response response = client.newCall(request).execute();
+                    subscriber.onNext(response);
+                    subscriber.onCompleted();
+                } catch (IOException e) {
+                    subscriber.onError(e);
+                }
+            }
+        }).subscribeOn(Schedulers.io());
+    }
+
+    public Observable<Response> get(final String url) {
         return Observable.create(new Observable.OnSubscribe<Response>() {
             @Override
             public void call(Subscriber<? super Response> subscriber) {

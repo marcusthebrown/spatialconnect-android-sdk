@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Represents a JSON object describing an implemenation of {@link ISCSpatialStore}.
@@ -49,7 +50,7 @@ public class SCStoreConfig
      * Unique id of the store.
      */
     @JsonProperty("id")
-    private String uniqueID;
+    private String uniqueId;
 
     /**
      * Descriptive name for the store used in the UI display.  Can't have a period (.)
@@ -112,14 +113,14 @@ public class SCStoreConfig
         this.uri = uri;
     }
 
-    public String getUniqueID()
+    public String getUniqueId()
     {
-        return uniqueID;
+        return uniqueId;
     }
 
-    public void setUniqueID(String uniqueID)
+    public void setUniqueId(String uniqueId)
     {
-        this.uniqueID = uniqueID;
+        this.uniqueId = uniqueId;
     }
 
     public String getName()

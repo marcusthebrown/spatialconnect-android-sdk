@@ -121,39 +121,33 @@ public class WFSStore extends SCRemoteDataStore implements ISCSpatialStore {
             );
         }
         final String featureUrl = getFeatureUrl;
-        return Observable.create(new Observable.OnSubscribe<SCSpatialFeature>(){
-            @Override
-            public void call(final Subscriber<? super SCSpatialFeature> subscriber) {
+        return Observable.create(new Observable.OnSubscribe<SCSpatialFeature>() {
+            @Override public void call(final Subscriber<? super SCSpatialFeature> subscriber) {
                 final SCGeometryFactory factory = new SCGeometryFactory();
-                try {
-                    HttpHandler.getInstance().get(featureUrl).subscribe(
-                            new Action1<Response>() {
-                                @Override
-                                public void call(Response res) {
-                                    try {
-                                        String response = res.body().string();
-                                        SCGeometryCollection collection = factory.getGeometryCollectionFromFeatureCollectionJson(response);
-                                        for (SCSpatialFeature feature : collection.getFeatures()) {
-                                            feature.setLayerId(feature.getId().split("\\.")[0]);  // the first part of the id is the layer name
-                                            feature.setStoreId(getStoreId());
-                                            subscriber.onNext(feature);
-                                        }
-                                        subscriber.onCompleted();
-                                    } catch (IOException ioe) {
-                                        subscriber.onError(ioe);
-                                    }
-                                }
-                            },
-                            new Action1<Throwable>() {
-                                @Override
-                                public void call (Throwable throwable){
-                                    Log.e(LOG_TAG, "something went wrong querying wfs: " + throwable.getMessage());
-                                }
-
-                            });
-                } catch (IOException ioe) {
-                    subscriber.onError(ioe);
-                }
+                HttpHandler.getInstance().get(featureUrl).subscribe(new Action1<Response>() {
+                    @Override public void call(Response res) {
+                        try {
+                            String response = res.body().string();
+                            SCGeometryCollection collection =
+                                factory.getGeometryCollectionFromFeatureCollectionJson(response);
+                            for (SCSpatialFeature feature : collection.getFeatures()) {
+                                feature.setLayerId(feature.getId()
+                                    .split(
+                                        "\\.")[0]);  // the first part of the id is the layer name
+                                feature.setStoreId(getStoreId());
+                                subscriber.onNext(feature);
+                            }
+                            subscriber.onCompleted();
+                        } catch (IOException ioe) {
+                            subscriber.onError(ioe);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override public void call(Throwable throwable) {
+                        Log.e(LOG_TAG,
+                            "something went wrong querying wfs: " + throwable.getMessage());
+                    }
+                });
             }
         });
     }
@@ -288,25 +282,17 @@ public class WFSStore extends SCRemoteDataStore implements ISCSpatialStore {
     }
 
     private void getLayers() {
-        try {
-            HttpHandler.getInstance().get(getGetCapabilitiesUrl())
-                    .subscribe(new Action1<Response>() {
-                                   @Override
-                                   public void call(Response response) {
-                                       vectorLayers = getLayerNames(response.body().byteStream());
-                                       if (vectorLayers != null) {
-                                           setStatus(SCDataStoreStatus.SC_DATA_STORE_RUNNING);
-                                       }
-                                   }
-                               },
-                            new Action1<Throwable>() {
-                                @Override
-                                public void call(Throwable t) {
-                                    setStatus(SCDataStoreStatus.SC_DATA_STORE_START_FAILED);
-                                }
-                            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        HttpHandler.getInstance().get(getGetCapabilitiesUrl()).subscribe(new Action1<Response>() {
+            @Override public void call(Response response) {
+                vectorLayers = getLayerNames(response.body().byteStream());
+                if (vectorLayers != null) {
+                    setStatus(SCDataStoreStatus.SC_DATA_STORE_RUNNING);
+                }
+            }
+        }, new Action1<Throwable>() {
+            @Override public void call(Throwable t) {
+                setStatus(SCDataStoreStatus.SC_DATA_STORE_START_FAILED);
+            }
+        });
     }
 }

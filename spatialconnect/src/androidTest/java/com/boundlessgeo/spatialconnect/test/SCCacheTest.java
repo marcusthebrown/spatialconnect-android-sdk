@@ -89,7 +89,7 @@ public class SCCacheTest extends BaseTestCase {
             //CREATE
             SCStoreConfig storeConfig = new SCStoreConfig();
             storeConfig.setType("geojson");
-            storeConfig.setUniqueID("foo123");
+            storeConfig.setUniqueId("foo123");
             storeConfig.setVersion("1");
             storeConfig.setUri("https://foo.com");
             storeConfig.setName("fooname");
@@ -126,7 +126,7 @@ public class SCCacheTest extends BaseTestCase {
             SCConfig config5 = cs.getCachedConfig();
             boolean notFound = true;
             for (SCStoreConfig c5store : config5.getStores()) {
-                if ( c5store.getUniqueID().equalsIgnoreCase("foo123")) {
+                if ( c5store.getUniqueId().equalsIgnoreCase("foo123")) {
                     notFound = true;
                     break;
                 }

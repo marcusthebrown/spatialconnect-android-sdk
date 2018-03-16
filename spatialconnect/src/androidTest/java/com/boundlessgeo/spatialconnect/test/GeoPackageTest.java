@@ -342,6 +342,11 @@ public class GeoPackageTest extends BaseTestCase {
         assertEquals("The Haiti gpkg should have 3 feature tables.", 3, featureSourcesSize);
     }
 
+    @Test
+    public void testGetFeaturePhotosAreDownloadedBeforeGeoPackageStoreStarts() {
+        GeoPackageStore store = (GeoPackageStore)sc.getDataService().getStoreByIdentifier(HAITI_GPKG_ID);
+    }
+
     //base sqliteHelperTest
     @Ignore
     public void testGeoPackageStoreCanBeAccessedBySCSqliteHelper() {

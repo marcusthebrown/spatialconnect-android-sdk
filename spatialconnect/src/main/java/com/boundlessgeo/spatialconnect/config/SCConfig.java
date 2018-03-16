@@ -69,7 +69,7 @@ public class SCConfig {
 
     public void updateStore(SCStoreConfig storeConfig) {
         for (int i = 0; i < stores.size(); i++) {
-            if (stores.get(i).getUniqueID().equalsIgnoreCase(storeConfig.getUniqueID())) {
+            if (stores.get(i).getUniqueId().equalsIgnoreCase(storeConfig.getUniqueId())) {
                 stores.add(i, storeConfig);
                 break;
             }
@@ -78,7 +78,7 @@ public class SCConfig {
 
     public void removeStore(String id) {
         for (int i = 0; i < stores.size(); i++) {
-            if (stores.get(i).getUniqueID().equalsIgnoreCase(id)) {
+            if (stores.get(i).getUniqueId().equalsIgnoreCase(id)) {
                 stores.remove(i);
                 break;
             }

@@ -32,7 +32,6 @@ import com.boundlessgeo.spatialconnect.query.SCPredicate;
 import com.boundlessgeo.spatialconnect.query.SCQueryFilter;
 import com.boundlessgeo.spatialconnect.scutilities.Json.JsonUtilities;
 import com.boundlessgeo.spatialconnect.scutilities.Json.SCObjectMapper;
-import com.boundlessgeo.spatialconnect.scutilities.Storage.SCFileUtilities;
 import com.boundlessgeo.spatialconnect.services.SCDataService;
 import com.boundlessgeo.spatialconnect.services.SCSensorService;
 import com.boundlessgeo.spatialconnect.services.SCServiceStatusEvent;
@@ -239,17 +238,17 @@ public class SCJavascriptBridgeAPI {
       storeConfig.setUri((String) payload.get("uri"));
       storeConfig.setType((String) payload.get("store_type"));
       storeConfig.setVersion((String) payload.get("version"));
-      storeConfig.setUniqueID((String) payload.get("id"));
+      storeConfig.setUniqueId((String) payload.get("id"));
       SCDataService dataService = mSpatialConnect.getDataService();
       boolean registered = dataService.registerStoreByConfig(storeConfig);
       if (registered) {
-          ((SCDataStoreLifeCycle)dataService.getStoreByIdentifier(storeConfig.getUniqueID()))
+          ((SCDataStoreLifeCycle)dataService.getStoreByIdentifier(storeConfig.getUniqueId()))
               .start().subscribe(subscriber);
           // save the config in the apps preferences
           try {
               String configJson = SCObjectMapper.getMapper().writeValueAsString(storeConfig);
               mSpatialConnect.getCache()
-                  .setValue(configJson, "sc.config.store." + storeConfig.getUniqueID());
+                  .setValue(configJson, "sc.config.store." + storeConfig.getUniqueId());
           } catch (JsonProcessingException e) {
               Log.e(TAG, "Could not serialize config to string", e);
           }

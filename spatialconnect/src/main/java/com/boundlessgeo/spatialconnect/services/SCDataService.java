@@ -143,7 +143,7 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
 
     public void registerAndStartStoreByConfig(SCStoreConfig config) {
         if (registerStoreByConfig(config)) {
-            SCDataStore store = stores.get(config.getUniqueID());
+            SCDataStore store = stores.get(config.getUniqueId());
             if (store != null) {
                 ((SCDataStoreLifeCycle) store).start();
             }
@@ -168,9 +168,9 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
      */
     public boolean registerStoreByConfig(SCStoreConfig scStoreConfig) {
         // todo: validate that config is valid (has unique id, etc)
-        if (stores.containsKey(scStoreConfig.getUniqueID())) {
+        if (stores.containsKey(scStoreConfig.getUniqueId())) {
             Log.d(LOG_TAG, String.format("Store with id %s already registered with SCDataService",
-                scStoreConfig.getUniqueID()));
+                scStoreConfig.getUniqueId()));
             return false;
         }
         String key = scStoreConfig.getType() + "." + scStoreConfig.getVersion();
@@ -218,7 +218,7 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
         Class store = getSupportedStoreByKey(key);
         if (store != null) {
 
-            SCDataStore currentStore = stores.get(scStoreConfig.getUniqueID());
+            SCDataStore currentStore = stores.get(scStoreConfig.getUniqueId());
             SCDataStore updatedStore = null;
 
             ArrayNode styleArray = scStoreConfig.getStyle();
@@ -239,7 +239,7 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
             }
 
             if (currentStore == null) {
-                Log.e(LOG_TAG, String.format("Store %s does not exists", scStoreConfig.getUniqueID()));
+                Log.e(LOG_TAG, String.format("Store %s does not exists", scStoreConfig.getUniqueId()));
                 return false;
             } else {
                 if (updatedStore != null) {
@@ -582,7 +582,7 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
     private void initializeFormStore() {
         SCStoreConfig formStoreConfig = new SCStoreConfig();
         formStoreConfig.setName(FormStore.NAME);
-        formStoreConfig.setUniqueID(FormStore.NAME);
+        formStoreConfig.setUniqueId(FormStore.NAME);
         formStoreConfig.setUri("file://" + FormStore.NAME);
         formStoreConfig.setType("gpkg");
         formStoreConfig.setVersion("1");
@@ -593,7 +593,7 @@ public class SCDataService extends SCService implements SCServiceLifecycle {
     private void initializeLocationStore() {
         SCStoreConfig locationStoreConfig = new SCStoreConfig();
         locationStoreConfig.setName(LocationStore.NAME);
-        locationStoreConfig.setUniqueID(LocationStore.NAME);
+        locationStoreConfig.setUniqueId(LocationStore.NAME);
         locationStoreConfig.setUri("file://" + LocationStore.NAME);
         locationStoreConfig.setType("gpkg");
         locationStoreConfig.setVersion("1");

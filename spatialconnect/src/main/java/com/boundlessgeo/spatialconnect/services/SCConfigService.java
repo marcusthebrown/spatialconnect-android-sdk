@@ -16,7 +16,6 @@
 package com.boundlessgeo.spatialconnect.services;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -184,7 +183,7 @@ public class SCConfigService extends SCService implements SCServiceLifecycle {
      * @param c {@link SCConfig} Config object to be loaded
      */
     public void removeStore(SCStoreConfig c) {
-        dataService.unregisterStore(dataService.getStoreByIdentifier(c.getUniqueID()));
+        dataService.unregisterStore(dataService.getStoreByIdentifier(c.getUniqueId()));
     }
 
     /**
